@@ -7,4 +7,5 @@ export enum EnumGridBase {
     DESERT = 4,
     PLAIN = 5,
     RIVER = 6,
+    CITY = 7,
 }

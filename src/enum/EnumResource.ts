@@ -4,5 +4,7 @@ export enum EnumResource {
     WOOD,
     STONE,
     CLAY,
-    COAL
+    COAL,
+    GOLD,
+    LABOR,
 }
