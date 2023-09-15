@@ -42,4 +42,20 @@ export default class Stockpile extends Map<EnumResource, number> {
             return false;
         }
     }
+
+    serialize() {
+        let obj: any = {};
+        for (let [key, value] of this.entries()) {
+            obj[key] = value;
+        }
+        return obj;
+    }
+
+    static deserialize(obj: any): Stockpile {
+        let stock = new Stockpile();
+        for (let key in obj) {
+            stock.set(parseInt(key) as EnumResource, obj[key]);
+        }
+        return stock;
+    }
 }

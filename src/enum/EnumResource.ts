@@ -1,4 +1,5 @@
 export enum EnumResource {
+    ALL,
     WOOL,
     FOOD,
     WOOD,

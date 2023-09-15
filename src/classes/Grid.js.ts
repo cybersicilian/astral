@@ -1,4 +1,5 @@
 import {EnumGridBase} from "../enum/EnumGridBase";
+import {EnumResource} from "../enum/EnumResource";
 
 export default class Grid {
 
@@ -10,5 +11,19 @@ export default class Grid {
 
     getBase() {
         return this.base;
+    }
+
+    getResource() {
+        return EnumResource.
+    }
+
+    serialize() {
+        return {
+            base: this.base
+        }
+    }
+
+    static deserialize(obj: any): Grid {
+        return new Grid(obj);
     }
 }
