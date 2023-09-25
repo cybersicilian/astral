@@ -1,0 +1,35 @@
+declare enum Choices {
+    PLAYER = 0,
+    OPPONENT = 1,
+    CARD_IN_HAND = 2,
+    CARD_IN_DISCARD = 3
+}
+declare enum AIPointer {
+    SELF = 0,
+    OPPONENT_MOST_CARDS = 1,
+    OPPONENT_LEAST_CARDS = 2,
+    OPPONENT_RANDOM = 3,
+    PLAYER_RANDOM = 4,
+    PLAYER_MOST_CARDS = 5,
+    PLAYER_LEAST_CARDS = 6,
+    CARD_IN_HAND_LEAST_POWER = 7,
+    CARD_IN_HAND_MOST_POWER = 8,
+    CARD_IN_HAND_RANDOM = 9,
+    CARD_IN_DISCARD_LEAST_POWER = 10,
+    CARD_IN_DISCARD_MOST_POWER = 11,
+    CARD_IN_DISCARD_RANDOM = 12,
+    OPPONENT_MOST_TURNS_REMAINING = 13,
+    OPPONENT_LEAST_TURNS_REMAINING = 14,
+    PLAYER_MOST_TURNS_REMAINING = 15,
+    PLAYER_LEAST_TURNS_REMAINING = 16
+}
+declare enum Rarity {
+    BASIC = 0,
+    COMMON = 1,
+    UNCOMMON = 2,
+    RARE = 3,
+    MYTHIC = 4,
+    LEGENDARY = 5,
+    HAXOR = 6
+}
+export { Choices, AIPointer, Rarity };

@@ -1,0 +1,22 @@
+{
+  "name": "vos-common",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "server": "bun runtime/dummies/init_server.ts",
+    "client": "bun runtime/dummies/init_dummy_client.ts",
+    "build": "bun build runtime/dummies/init_server.ts --target bun --outdir ../vos --minify --entry-naming index.js && cd ../vos && git commit -am \"auto\" && git add . && git push origin",
+    "compile": "bun build runtime/dummies/init_server.ts --outfile server --compile"
+  },
+  "dependencies": {
+    "@types/react": "^18.2.22",
+    "bun": "^1.0.3",
+    "react": "^18.2.0",
+    "ws": "^8.14.2"
+  }
+}
