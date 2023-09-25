@@ -8,11 +8,11 @@ import {IIdentifiable} from "../../structure/interfaces/IIdentifiable";
 import {ChoiceType} from "../cards/choices/ChoiceType";
 import {IProppable, Properties} from "../../structure/interfaces/IProppable";
 import {EventCluster, IEventable} from "../../structure/interfaces/IEventable";
+import {CardAction, VosEvent} from "../../structure/utils/Generics";
 import {AbilityChoices} from "../cards/choices/AbilityChoices";
 import Bot from "./bots/Bot";
 import BotType from "./bots/BehaviorProfile";
 import {Zone} from "../cards/Zone";
-import {TurnInterrupt} from "../../structure/utils/TurnInterrupt";
 
 //these shouldn't be here, but I'm too lazy to move them
 export type CardState = {
@@ -59,8 +59,6 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
     private host: boolean = false
 
     private botProfile?: Bot = undefined
-
-    private turnInterrupts: TurnInterrupt[] = []
 
 
     private eventList: {
@@ -151,35 +149,6 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
                 }
             }
         })
-    }
-
-    resolveNextInterrupt(ti: string, value: string|number, cardArgs: CardArgs){
-        let type: TurnInterrupt = Object.values(TurnInterrupt).find(x => x == ti) as TurnInterrupt
-        let index = this.turnInterrupts.indexOf(type)
-        if (index > 0) {
-            //resolve it
-            switch (type) {
-                case TurnInterrupt.DISCARD_FROM_HAND:
-                    let idInHand: number = parseInt(value as string) || 0
-                    if (idInHand >= 0 && idInHand < this.cih().length) {
-                        this.discard(this.cih()[idInHand], cardArgs.deck)
-                    }
-                    break;
-            }
-        }
-    }
-
-    getInterrupts() {
-        //when this is called, we check cleanup
-        if (this.cih().length == 0) {
-            //remove all DISCARD_FROM_HAND interrupts
-            this.turnInterrupts = this.turnInterrupts.filter(x => x != TurnInterrupt.DISCARD_FROM_HAND)
-        }
-        return this.turnInterrupts
-    }
-
-    noInterrupts() {
-        return !this.getInterrupts() || this.turnInterrupts.length == 0
     }
 
     addResource(key: string, amt: number) {
@@ -543,22 +512,13 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
         }
     }
 
-    addInterrupt(ti: TurnInterrupt, cardArgs: CardArgs) {
-        this.turnInterrupts.push(ti)
-        this.fireEvents("new_interrupts", cardArgs)
-    }
-
     discardChoose(cardArgs: CardArgs) {
         //TODO: allow player choice
-        if (!this.isBot()) {
-            this.addInterrupt(TurnInterrupt.DISCARD_FROM_HAND, cardArgs)
+        let card = this.weightedDiscard(cardArgs)
+        if (card) {
+            this.discard(card, cardArgs.deck!)
         } else {
-            let card = this.weightedDiscard(cardArgs)
-            if (card) {
-                this.discard(card, cardArgs.deck!)
-            } else {
-                this.discardRandom(cardArgs)
-            }
+            this.discardRandom(cardArgs)
         }
     }
 

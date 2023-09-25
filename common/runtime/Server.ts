@@ -1,7 +1,7 @@
 import Player from "../logic/gameplay/player/Player";
 import Deck from "../logic/gameplay/deck/Deck";
 import DeckList from "../logic/gameplay/deck/DeckList";
-import {CommEnum} from "../logic/structure/utils/CommEnum";
+import {CommEnum} from "../logic/gameplay/server/CommEnum";
 import {Choices} from "../logic/structure/utils/CardEnums";
 import Upgrade from "../logic/gameplay/player/systems/Upgrade";
 import {CardArgs} from "../logic/gameplay/cards/CardArgs";
@@ -24,7 +24,6 @@ export type ServerConfig = {
 export default class GameServer {
 
     private players: { [key: string]: Player } = {}
-    private nextTurn: { [key: string]: boolean } = {}
     private sockets: { [key: string]: any } = {}
     private deck: Deck
 
@@ -89,7 +88,7 @@ export default class GameServer {
     }
 
     log(content: string) {
-        //console.log(content)
+        console.log(content)
         this.logEntries.push(content.toString())
     }
 
@@ -111,16 +110,10 @@ export default class GameServer {
         this.players[id].addEvent("new_upgrade", (cardArgs) => {
             this.updateUpgradeShop(id)
         })
-        this.players[id].addEvent("new_interrupts", (cardArgs) => {
-            this.updateInterrupts(id)
-            //console.log("new interrupts")
-            //console.log(this.players[id].getInterrupts())
-        })
         if (this.activeTurn === "") {
             this.activeTurn = id
             this.players[id].setHost()
         }
-        this.nextTurn[id] = false;
         return {id: id, index: Object.keys(this.players).length - 1}
     }
 
@@ -133,7 +126,6 @@ export default class GameServer {
 
         let id = Math.random().toString(36).substring(7);
         this.players[id] = new Player(this.serverConfig.startingHand, this.deck).setTurnPlacement(Object.keys(this.players).length).setName(GameServer.createName()).setBot()
-        this.nextTurn[id] = false;
         this.gameLog(`${this.players[id].getLogText()} joined the game as a bot.`)
         return id
     }
@@ -176,10 +168,6 @@ export default class GameServer {
     incrementTurn() {
         this.gameLog(`${this.getActive().getLogText()} ended their turn.`)
         this.gameLog(`===NEW TURN===`)
-        //reset the next turn array
-        for (let key of Object.keys(this.nextTurn)) {
-            this.nextTurn[key] = false
-        }
         this.turnPhase = 0
         if (Object.values(this.players).length == 0) {
             this.activeTurn = ""
@@ -251,15 +239,6 @@ export default class GameServer {
         this.getActive().weightedDiscardToHand(baseArgs)
 
         this.incrementTurn()
-    }
-
-    //interrupts only matter at the end of the play phase
-    updateInterrupts(id: string) {
-        let ws = this.sockets[id]
-        ws.send(JSON.stringify({
-            type: CommEnum.SEND_INTERRUPTS,
-            interrupts: this.players[id].getInterrupts()
-        }))
     }
 
     updateUpgradeShop(id: string) {
@@ -372,14 +351,14 @@ export default class GameServer {
     }
 
     adjustAIHeuristics(num_sims: number = 250) {
-        //console.log(`Adjusting AI heuristics...`)
+        console.log(`Adjusting AI heuristics...`)
         let mods = adjustAIWeights(num_sims, false)
         for (let botName of Object.keys(BotType)) {
-            //console.log(`\n=== ${botName} ===`)
+            console.log(`\n=== ${botName} ===`)
             for (let mod of Object.keys(mods)) {
                 if (BotType[botName][mod]) {
                     let newMod = Math.round(BotType[botName][mod] * mods[mod] * 100) / 100
-                    //console.log(`${mod}: ${BotType[botName][mod]} -> ${newMod}`);
+                    console.log(`${mod}: ${BotType[botName][mod]} -> ${newMod}`);
                     BotType[botName][mod] = newMod
                 }
             }
@@ -517,14 +496,12 @@ export default class GameServer {
                         let choiceObjs: (ChoiceType)[][] = choices.map((selections, abilityId) => {
                             let ability = card.orderAbilities()[abilityId]
                             return selections.map((selection, choiceId) => {
-                                let p = {
+                                let type = ability.informChoices({
                                     owner: server.players[id],
                                     opps: opps,
                                     deck: server.deck,
                                     card: card
-                                }
-                                //console.log(ability.informChoices(p))
-                                let type = ability.informChoices(p)[choiceId]
+                                })[choiceId]
                                 switch (type.choice) {
                                     case Choices.OPPONENT:
                                     case Choices.PLAYER:
@@ -555,16 +532,7 @@ export default class GameServer {
                                 server.gameLog(`${server.players[id].getLogText()} plays ${card.getLogText()}.`)
                             }
                             server.players[id].play(card, opps, server.deck, choiceObjs)
-                            for (let socket of Object.keys(server.sockets)) {
-                                if (server.players[socket].noInterrupts() || server.players[socket].isBot()) {
-                                    server.sockets[socket].send(JSON.stringify({
-                                        type: CommEnum.PLAY_PHASE_CONFIRM,
-                                        id: socket
-                                    }))
-                                } else {
-                                    server.updateInterrupts(socket)
-                                }
-                            }
+                            server.incrementPhase()
                         } else if (server.activeTurn === id) {
                             ws.send(JSON.stringify({
                                 type: CommEnum.ERROR,
@@ -581,28 +549,6 @@ export default class GameServer {
                                 message: "This card can't be played - not playable."
                             }))
                         }
-                        break;
-                    case CommEnum.PLAY_PHASE_CONFIRM:
-                        server.nextTurn[id] = true
-                        if (!server.players[id].noInterrupts() && !server.players[id].isBot()) {
-                            server.nextTurn[id] = false
-                            server.updateInterrupts(id)
-                        } else if (Object.keys(server.nextTurn).every((e) => {
-                            return server.nextTurn[e] && (server.players[e].noInterrupts() || server.players[e].isBot())
-                        })) {
-                            server.incrementPhase()
-                        }
-                        //console.log(server.nextTurn)
-                        //console.log(id)
-                        break;
-                    case CommEnum.RESOLVE_INTERRUPT:
-                        //todo: interrupt resolution logic here
-                        server.players[id].resolveNextInterrupt(result.interrupt, result.value, {
-                            owner: server.players[id],
-                            opps: opps,
-                            deck: server.deck
-                        })
-                        server.updateInterrupts(id)
                         break;
                     case CommEnum.DISCARD_TO_HAND:
                         let toDiscard: number[] = result.idInHand
