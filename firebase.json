@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "./vos-frontend/dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
