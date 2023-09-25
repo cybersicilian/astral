@@ -22,11 +22,6 @@ export default class AbilityDiscardOppCard extends BaseAbility {
             discardsOpponentCards: (cardArgs) => cardArgs.card.pow() + qty
         })
 
-        this.setWeights({
-            play: 3,
-            discard: 0,
-            give: -1
-        })
         this.setFormula(`{pow} + ${qty}`)
     }
 }

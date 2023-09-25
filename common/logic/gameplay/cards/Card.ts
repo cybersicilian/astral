@@ -113,35 +113,6 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
         return this.abilities;
     }
 
-    getWeights(cardArgs: CardArgs) {
-        let weightComp = this.abilities.map((ability) => ability.getWeights())
-        let newWeight = {
-            play: 0,
-            give: 0,
-            discard: 0
-        }
-        for (let weight of weightComp) {
-            if (typeof weight.play === "function") {
-                newWeight.play += weight.play(cardArgs)
-            } else {
-                newWeight.play += weight.play
-            }
-
-            if (typeof weight.give === "function") {
-                newWeight.give += weight.give(cardArgs)
-            } else {
-                newWeight.give += weight.give
-            }
-
-            if (typeof weight.discard === "function") {
-                newWeight.discard += weight.discard(cardArgs)
-            } else {
-                newWeight.discard += weight.discard
-            }
-        }
-        return newWeight
-    }
-
     getName() {
         return this.name;
     }

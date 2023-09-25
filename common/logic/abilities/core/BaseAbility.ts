@@ -2,7 +2,6 @@ import {CardArgs} from "../../gameplay/cards/CardArgs";
 import {Choices} from "../../structure/utils/CardEnums";
 import Player from "../../gameplay/player/Player";
 import {AbilityChoices} from "../../gameplay/cards/choices/AbilityChoices";
-import {Weights} from "../../gameplay/ai/AIWeights";
 import {ChoiceType} from "../../gameplay/cards/choices/ChoiceType";
 import {IProppable, Properties} from "../../structure/interfaces/IProppable";
 import {VosEvent} from "../../structure/utils/Generics";
@@ -17,11 +16,6 @@ export default class BaseAbility implements IProppable, IEventable, IPlayable {
     private readonly callback: (abilityArgs: CardArgs, madeChoices: (ChoiceType)[]) => void;
     private readonly choices: ResolverCallback<(c: CardArgs) => AbilityChoices[]> = new ResolverCallback([]);
     private formula: string = `{pow}`
-    private weights: Weights = {
-        play: 1,
-        give: 1,
-        discard: 1
-    } //todo: this is fairly obsolete
     canPlay: ResolverCallback<(c: CardArgs) => boolean> = new ResolverCallback(true)
     canGive: ResolverCallback<(p: Player, c: CardArgs) => boolean> = new ResolverCallback(true)
 
@@ -55,7 +49,6 @@ export default class BaseAbility implements IProppable, IEventable, IPlayable {
     clone() {
         let ability = new BaseAbility(this.text, this.choices.resolve(), this.callback)
         ability.setFormula(this.formula)
-        ability.setWeights(this.weights)
         ability.setCanPlay(this.canPlay.getCallback())
         ability.setCanGive(this.canGive.getCallback())
         ability.sai(this.ai())
@@ -124,15 +117,6 @@ export default class BaseAbility implements IProppable, IEventable, IPlayable {
 
     getFormulatedText(cardArgs: CardArgs) {
         return this.text.replace("{formula}", this.calcFormula(cardArgs));
-    }
-
-    setWeights(weights: Weights) {
-        this.weights = weights;
-        return this;
-    }
-
-    getWeights() {
-        return this.weights;
     }
 
     informChoices(args: CardArgs) {

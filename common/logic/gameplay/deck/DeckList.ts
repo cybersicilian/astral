@@ -16,7 +16,6 @@ import AbilityAddDeck from "../../abilities/AbilityAddDeck";
 import AbilityZombieRestriction from "../../abilities/AbilityZombieRestriction";
 import OnDrawAbility from "../../abilities/core/OnDrawAbility";
 import AbilityAddEventToSelf from "../../abilities/AbilityAddEventToSelf";
-import AbilityAddEventToOpponent from "../../abilities/AbilityAddEventToOpponent";
 import AbilityWin from "../../abilities/AbilityWin";
 import AbilitySetPropSelf from "../../abilities/AbilitySetPropSelf";
 import AbilityRecoverCards from "../../abilities/AbilityRecoverCards";
@@ -293,7 +292,7 @@ const DeckList: { [key: string]: Card[] } = {
                     resource: "tadbucks"
                 }],
                 locked: false
-            }, (c,u) => {
+            }, (c, u) => {
                 c.owner.addResource("wood", Math.floor(10 * Math.pow(1.15, u.lvl())))
             }, true, 1.25))
         ]),
@@ -306,7 +305,7 @@ const DeckList: { [key: string]: Card[] } = {
                     resource: "tadbucks"
                 }],
                 locked: false
-            }, (c,u) => {
+            }, (c, u) => {
                 c.owner.addResource("food", Math.floor(10 * Math.pow(1.15, u.lvl())))
             }, true, 1.25))
         ]),
@@ -319,7 +318,7 @@ const DeckList: { [key: string]: Card[] } = {
                     resource: "tadbucks"
                 }],
                 locked: false
-            }, (c,u) => {
+            }, (c, u) => {
                 c.owner.addResource("metal", Math.floor(10 * Math.pow(1.15, u.lvl())))
             }, true, 1.25))
         ]),
@@ -332,7 +331,7 @@ const DeckList: { [key: string]: Card[] } = {
                     resource: "tadbucks"
                 }],
                 locked: false
-            }, (c,u) => {
+            }, (c, u) => {
                 c.owner.addResource("stone", Math.floor(10 * Math.pow(1.15, u.lvl())))
             }, true, 1.25))
         ]),
@@ -578,63 +577,19 @@ const DeckList: { [key: string]: Card[] } = {
         ])
     ],
     alchemy_deck: [
-        new Card(`Curse of Cuckage`, [
-            new OnDrawAbility(new AbilityDrawCard(1)),
-            new AbilityAddEventToOpponent(["temp_can_win"], (abilityArgs) => {
-                abilityArgs.owner.setCanWin(false, "cards in hand")
-            }).setText("The next time an opponent tries to win, they don't.")
-        ]).setRarity(Rarity.HAXOR).setProp("curse", true),
-        new Card(`Rite of Suffering`, [
-            new CostAbility("population", 3),
-            new BaseAbility(`Each opponent discards {formula} cards.`, [], (abilityArgs, madeChoices) => {
-                for (let player of abilityArgs.opps) {
-                    for (let i = 0; i < 3; i++) {
-                        player.discardChoose(abilityArgs)
-                    }
-                }
-            }).setFormula(`3 + {pow}`)
-        ]).setRarity(Rarity.MYTHIC).setProp("curse", true),
-        new Card(`Curse of Apathy`, [
-            new OnDrawAbility(new BaseAbility(`Increase your cards to win by {formula}`, [], (abilityArgs, madeChoices) => {
-                abilityArgs.owner.addTurns(abilityArgs.card!.pow())
-            })).setFormula(`{pow}`),
-            new AbilityDiscardSelfCard(1)
-        ]).setRarity(Rarity.COMMON).setProp("curse", true),
-        new Card(`Curse of Suffering`, [
-            new OnDrawAbility(new BaseAbility(`Lose {formula} life.`, [], (abilityArgs, madeChoices) => {
-                //the owner should lose life
-                if (!abilityArgs.owner.getProp("res_life")) {
-                    abilityArgs.owner.setProp("res_life", 1, abilityArgs)
-                }
-                abilityArgs.owner.setProp("res_life", abilityArgs.owner.getProp("res_life") - (3 + abilityArgs.card!.pow()), abilityArgs)
-            })).setFormula(`3 + {pow}`),
-            new AbilityDiscardSelfCard(1)
-        ]).setRarity(Rarity.COMMON).setProp("curse", true).setCanGive(false),
-        new Card(`Curse of Decay`, [
-            new OnDrawAbility(new AbilityDiscardSelfCard(1)),
-            new AbilityAddEventToOpponent(["temp_turn_end"], (abilityArgs) => {
-                abilityArgs.owner.discardChoose(abilityArgs)
-                abilityArgs.owner.discardChoose(abilityArgs)
-            }).setText("Choose an opponent. They discard two cards at the end of their next turn.")
-        ]).setProp("curse", true),
-        new Card(`Connive`, [
-            new AbilityDrawCard(1),
-            new BaseAbility(`Copy a curse in your hand, then put it on top of the deck.`, [
-                {
-                    choice: Choices.CARD_IN_HAND,
-                    pointer: AIPointer.CARD_IN_HAND_MOST_POWER,
-                    restriction: (abilityArgs) => {
-                        return abilityArgs.owner.cih().filter((card) => card.getProp("curse")).length > 0
-                    }
-                }
-            ], (abilityArgs, madeChoices) => {
-                //put a copy on top of the deck
-                let curse = madeChoices[0] as Card
-                abilityArgs.deck!.push(curse.clone())
-            }).setCanPlay((cardArgs) => {
-                return cardArgs.owner.cih().filter((card) => card.getProp("curse")).length > 0
-            })
-        ]).setRarity(Rarity.RARE)
+        new Card(`Harvest Snowthistle`, [
+            new AbilityUnlockUpgrade(new Upgrade({
+                name: "Forage Snowthistle",
+                description: "Forage snowthistle.",
+                cost: [{
+                    amt: 1,
+                    resource: "turns"
+                }],
+                locked: false
+            }, (c) => {
+                c.owner.addResource("snowroot", 1)
+            }, true, 1.1), false)
+        ]).setRarity(Rarity.BASIC)
     ],
     gambling_deck: [
         new Card(`Lady Fortune's Favor`, [
@@ -870,11 +825,11 @@ const DeckList: { [key: string]: Card[] } = {
     ],
     point_deck: [
         new Card("Point of Pity", [
-           new BaseAbility("If you have -{formula} or fewer points, you win the game on your next turn", [], (a, m) => {
-               if (a.owner.getProp("points") <= -(100 - a.card!.pow())) {
-                   a.owner.setCanWin(true, "had a point of pity")
-               }
-           }).setFormula(`100 - {pow}`)
+            new BaseAbility("If you have -{formula} or fewer points, you win the game on your next turn", [], (a, m) => {
+                if (a.owner.getProp("points") <= -(100 - a.card!.pow())) {
+                    a.owner.setCanWin(true, "had a point of pity")
+                }
+            }).setFormula(`100 - {pow}`)
         ]).setRarity(Rarity.RARE),
         new Card("Pointlessify", [
             new BaseAbility("Reduce all point values in an opponents hand to -1. Gain points equal to the difference.", [{
@@ -916,8 +871,11 @@ const DeckList: { [key: string]: Card[] } = {
             new BaseAbility("Slow your roll. You pray instead of getting closer to winning", [], (a, m) => a.owner.addTurns(1))
         ]).setRarity(Rarity.BASIC),
     ],
-    romance: [
-
+    romance: [],
+    poop_deck: [
+        new Card(`Pile o' Crap`, [
+            new TextAbility(`💩`)
+        ]).setRarity(Rarity.BASIC).setProp("crap", true),
     ],
     basic: [
         new Card(`Just Do Better`, [
@@ -1052,7 +1010,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.BASIC),
         new Card(`Encrust in Gold`, [
             new BaseAbility(`Increase a card in your hands rarity. It gains {formula} power`, [
-                { choice: Choices.CARD_IN_HAND, pointer: AIPointer.CARD_IN_HAND_LEAST_POWER }
+                {choice: Choices.CARD_IN_HAND, pointer: AIPointer.CARD_IN_HAND_LEAST_POWER}
             ], (a, c) => {
                 let card = c[0] as Card
                 card.setRarity(card.getRarity() + 1)
@@ -1064,12 +1022,12 @@ const DeckList: { [key: string]: Card[] } = {
             new AbilityRecoverCards(1).setFormula(`{pow}`)
         ]).setRarity(Rarity.UNCOMMON),
         new Card(`Rough Breakup`, [
-           new AbilityExplodeCard(),
-           new BaseAbility(`Reduce the power of cards in your hand by {formula}`, [], (a, c) => {
+            new AbilityExplodeCard(),
+            new BaseAbility(`Reduce the power of cards in your hand by {formula}`, [], (a, c) => {
                 a.owner.cih().forEach((card) => {
-                     card.setPow(card.pow() - a.card!.pow())
+                    card.setPow(card.pow() - a.card!.pow())
                 })
-           }).setFormula(`{pow}`)
+            }).setFormula(`{pow}`)
         ]),
         new Card(`Mutual Cuckage`, [
             new BaseAbility(`Increase everyone's cards to play to win by {formula}`, [], (a, m) => {
@@ -1108,9 +1066,6 @@ const DeckList: { [key: string]: Card[] } = {
                 }
             }).setFormula(`{pow} + 2`)
         ]).setRarity(Rarity.COMMON),
-        new Card(`Pile o' Crap`, [
-            new TextAbility(`💩`)
-        ]).setRarity(Rarity.BASIC).setProp("crap", true),
         new Card(`Beanz It`, [
             new BaseAbility(`Add "Add {formula} turns to an opponent" to a card in your hand.`, [
                 {choice: Choices.CARD_IN_HAND, pointer: AIPointer.CARD_IN_HAND_RANDOM}

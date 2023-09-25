@@ -13,8 +13,8 @@ export type UpgradeData = {
 export default class Upgrade {
     private readonly data: UpgradeData
     private readonly effect: (cardArgs: CardArgs, upgrade: Upgrade) => void
-    private infinite: boolean = false
-    private scale: number = 1.1
+    private readonly infinite: boolean = false
+    private readonly scale: number = 1.1
     private level = 0;
 
     constructor(data: UpgradeData, effect: (cardArgs: CardArgs, upgrade: Upgrade) => void, infinite= false, scale = 1.1) {

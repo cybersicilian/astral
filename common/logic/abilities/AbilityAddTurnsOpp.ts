@@ -12,11 +12,6 @@ export default class AbilityAddTurnsOpp extends BaseAbility {
             let opponent = madeChoices[0] as Player
             opponent.addTurns(qty + abilityArgs.card?.pow())
         })
-        this.setWeights({
-            play: 3,
-            discard: 0,
-            give: -1
-        })
         this.setFormula(`{pow} + ${qty}`)
         this.sai({
             oppWinSetback: qty,

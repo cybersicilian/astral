@@ -7,11 +7,6 @@ export default class AbilityAddResource extends BaseAbility {
             let owned = abilityArgs.owner.getProp(`res_${resource}`) ?? 0
             abilityArgs.owner.setProp(`res_${resource}`, owned + amt, abilityArgs)
         })
-        this.setWeights({
-            play: 2 + qty,
-            discard: 1 - qty,
-            give: 1 - qty
-        })
         this.setProp("resource", true)
         if (!this.getProp("produce")) this.setProp("produce", [])
         this.setProp("produce", [...this.getProp("produce"), resource])

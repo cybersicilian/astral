@@ -76,8 +76,8 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
 
         this.setProp("meta_upgrade", [])
         this.addUpgrade(new Upgrade({
-            name: "Meticulous Analysis",
-            description: "Draw a card at the expense of slowing down.",
+            name: "Take a Crap",
+            description: "Take a bathroom break to draw a card.",
             cost: [{
                 amt: 1,
                 resource: "turns"
@@ -85,6 +85,7 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
             locked: false
         }, (cardArgs) => {
             cardArgs.owner.draw(cardArgs.deck!, 1)
+            cardArgs.deck.addCards(Deck.fromCardList(1, DeckList["poop_deck"]))
         }, true, 1.5))
 
 
