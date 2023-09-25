@@ -18,7 +18,7 @@ export default class Upgrade {
     private level = 0;
 
     constructor(data: UpgradeData, effect: (cardArgs: CardArgs, upgrade: Upgrade) => void, infinite= false, scale = 1.1) {
-        this.data = data
+        this.data = JSON.parse(JSON.stringify(data))
         this.effect = effect
         this.infinite = infinite
         this.scale = scale
