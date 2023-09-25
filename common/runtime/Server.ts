@@ -89,7 +89,7 @@ export default class GameServer {
     }
 
     log(content: string) {
-        console.log(content)
+        //console.log(content)
         this.logEntries.push(content.toString())
     }
 
@@ -113,6 +113,8 @@ export default class GameServer {
         })
         this.players[id].addEvent("new_interrupts", (cardArgs) => {
             this.updateInterrupts(id)
+            //console.log("new interrupts")
+            //console.log(this.players[id].getInterrupts())
         })
         if (this.activeTurn === "") {
             this.activeTurn = id
@@ -256,7 +258,7 @@ export default class GameServer {
         let ws = this.sockets[id]
         ws.send(JSON.stringify({
             type: CommEnum.SEND_INTERRUPTS,
-            interrupts: this.getActive().getInterrupts()
+            interrupts: this.players[id].getInterrupts()
         }))
     }
 
@@ -370,14 +372,14 @@ export default class GameServer {
     }
 
     adjustAIHeuristics(num_sims: number = 250) {
-        console.log(`Adjusting AI heuristics...`)
+        //console.log(`Adjusting AI heuristics...`)
         let mods = adjustAIWeights(num_sims, false)
         for (let botName of Object.keys(BotType)) {
-            console.log(`\n=== ${botName} ===`)
+            //console.log(`\n=== ${botName} ===`)
             for (let mod of Object.keys(mods)) {
                 if (BotType[botName][mod]) {
                     let newMod = Math.round(BotType[botName][mod] * mods[mod] * 100) / 100
-                    console.log(`${mod}: ${BotType[botName][mod]} -> ${newMod}`);
+                    //console.log(`${mod}: ${BotType[botName][mod]} -> ${newMod}`);
                     BotType[botName][mod] = newMod
                 }
             }
@@ -406,7 +408,6 @@ export default class GameServer {
                 let result = JSON.parse(message as string)
                 let id = result.id
                 let opps = Object.keys(server.players).filter(key => key !== id).map(key => server.players[key])
-                console.log(result)
                 switch (result.type) {
                     case CommEnum.SET_NAME:
                         if (result.name.length < 1) {
@@ -516,12 +517,14 @@ export default class GameServer {
                         let choiceObjs: (ChoiceType)[][] = choices.map((selections, abilityId) => {
                             let ability = card.orderAbilities()[abilityId]
                             return selections.map((selection, choiceId) => {
-                                let type = ability.informChoices({
+                                let p = {
                                     owner: server.players[id],
                                     opps: opps,
                                     deck: server.deck,
                                     card: card
-                                })[choiceId]
+                                }
+                                //console.log(ability.informChoices(p))
+                                let type = ability.informChoices(p)[choiceId]
                                 switch (type.choice) {
                                     case Choices.OPPONENT:
                                     case Choices.PLAYER:
@@ -552,9 +555,16 @@ export default class GameServer {
                                 server.gameLog(`${server.players[id].getLogText()} plays ${card.getLogText()}.`)
                             }
                             server.players[id].play(card, opps, server.deck, choiceObjs)
-                            ws.send(JSON.stringify({
-                                type: CommEnum.PLAY_PHASE_CONFIRM
-                            }))
+                            for (let socket of Object.keys(server.sockets)) {
+                                if (server.players[socket].noInterrupts() || server.players[socket].isBot()) {
+                                    server.sockets[socket].send(JSON.stringify({
+                                        type: CommEnum.PLAY_PHASE_CONFIRM,
+                                        id: socket
+                                    }))
+                                } else {
+                                    server.updateInterrupts(socket)
+                                }
+                            }
                         } else if (server.activeTurn === id) {
                             ws.send(JSON.stringify({
                                 type: CommEnum.ERROR,
@@ -582,6 +592,8 @@ export default class GameServer {
                         })) {
                             server.incrementPhase()
                         }
+                        //console.log(server.nextTurn)
+                        //console.log(id)
                         break;
                     case CommEnum.RESOLVE_INTERRUPT:
                         //todo: interrupt resolution logic here

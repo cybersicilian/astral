@@ -170,11 +170,16 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
     }
 
     getInterrupts() {
+        //when this is called, we check cleanup
+        if (this.cih().length == 0) {
+            //remove all DISCARD_FROM_HAND interrupts
+            this.turnInterrupts = this.turnInterrupts.filter(x => x != TurnInterrupt.DISCARD_FROM_HAND)
+        }
         return this.turnInterrupts
     }
 
     noInterrupts() {
-        return this.turnInterrupts.length == 0
+        return !this.getInterrupts() || this.turnInterrupts.length == 0
     }
 
     addResource(key: string, amt: number) {

@@ -153,7 +153,7 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
         //useful flags for the turn to shorthand logic
         let NEXT_CHOICE = this.props.client.nextChoiceToMake()
 
-
+        console.log(this.props.client.nextInterrupt())
         //you can pick a card if you are the selecting card stage of the gifting state
         let FLAG_CAN_PICK_CARD = false
         let FLAG_CAN_PICK_CARD_IN_YARD = FLAG_CAN_PICK_CARD ||

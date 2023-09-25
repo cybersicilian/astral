@@ -168,7 +168,8 @@ export default class Client {
         if (this.turnInterrupts.length == 0) {
             //TODO: opponent choices here
             this.socket.send(JSON.stringify({
-                type: CommEnum.PLAY_PHASE_CONFIRM
+                type: CommEnum.PLAY_PHASE_CONFIRM,
+                id: this.id
             }))
         }
     }
@@ -185,6 +186,7 @@ export default class Client {
         this.socket.send(JSON.stringify({
             type: CommEnum.RESOLVE_INTERRUPT,
             interrupt: this.turnInterrupts.shift(),
+            id: this.id,
             value: val
         }))
     }
@@ -283,7 +285,7 @@ export default class Client {
         // message is received
         socket.addEventListener("message", event => {
             let body = JSON.parse(event.data as string)
-            console.log(body)
+            //console.log(body)
             switch (body.type) {
                 case CommEnum.CONNECTED:
                     this.id = body.connected
@@ -333,12 +335,15 @@ export default class Client {
                 case CommEnum.PLAY_PHASE_CONFIRM:
                     if (this.turnInterrupts.length == 0) {
                         this.confirmNextTurn()
+                        //console.log("Confirmed!")
                     }
                     break;
                 case CommEnum.SEND_INTERRUPTS:
                     this.turnInterrupts = body.interrupts
                     if (this.turnInterrupts.length == 0) {
-                        this.confirmNextTurn()
+                        // this.confirmNextTurn()
+                    } else {
+                        //console.log("Interrupts received!")
                     }
                     break;
             }
@@ -346,7 +351,7 @@ export default class Client {
 
         // socket opened
         socket.addEventListener("open", event => {
-            console.log("connected")
+            //console.log("connected")
         });
 
         // socket closed

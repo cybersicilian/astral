@@ -5,7 +5,7 @@ import Player from "../gameplay/player/Player";
 export default class AbilityDiscardOppCard extends BaseAbility {
 
     constructor(qty: number) {
-        super(`Opponent discards {formula} cards`, [
+        super(`Opponent discards {formula} cards at random`, [
             { choice: Choices.OPPONENT, pointer: Pointer.OPPONENT_MOST_CARDS }
         ], (abilityArgs, madeChoices) => {
             let opponent = madeChoices[0] as Player
@@ -13,7 +13,7 @@ export default class AbilityDiscardOppCard extends BaseAbility {
                 if (opponent.inHand() === 0) {
                     break;
                 }
-                opponent.discardChoose(abilityArgs)
+                opponent.discardRandom(abilityArgs)
             }
         })
 
