@@ -1,5 +1,5 @@
 import {CardState, PlayerState} from "vos-common/logic/gameplay/player/Player";
-import {GameState} from "vos-common/logic/gameplay/server/CommEnum";
+import {GameState} from "vos-common/logic/structure/utils/CommEnum";
 import React from "react";
 import Client, {CompositeState} from "vos-common/runtime/Client";
 import {Button, Col, Container, Row, Tab, TabPane, Tabs} from "react-bootstrap";
@@ -8,6 +8,7 @@ import PlayerCard from "./PlayerCard";
 import {Choices} from "vos-common/logic/structure/utils/CardEnums";
 import LogEntry from "./LogEntry";
 import UpgradeShop from "./UpgradeShop";
+import {TurnInterrupt} from "vos-common/logic/structure/utils/TurnInterrupt";
 
 
 type PlayerViewProps = {
@@ -158,11 +159,13 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
         let FLAG_CAN_PICK_CARD_IN_YARD = FLAG_CAN_PICK_CARD ||
             (state == TurnState.Play && this.state.playState == PlayState.SelectingChoices &&
                 NEXT_CHOICE && (NEXT_CHOICE.choice === Choices.CARD_IN_DISCARD))
-        let FLAG_CAN_PICK_CARD_IN_HAND = FLAG_CAN_PICK_CARD || (state == TurnState.Give && this.state.giftingState == GiftingState.SelectingCard) ||
+        let FLAG_CAN_PICK_CARD_IN_HAND = FLAG_CAN_PICK_CARD ||
+            (state == TurnState.Give && this.state.giftingState == GiftingState.SelectingCard) ||
             (state == TurnState.Play && this.state.playState == PlayState.SelectingCard) ||
             (state == TurnState.Play && this.state.playState == PlayState.SelectingChoices
                 && NEXT_CHOICE && (NEXT_CHOICE.choice === Choices.CARD_IN_HAND) ||
-                (state == TurnState.Discard))
+                (state == TurnState.Discard)) ||
+            (state == TurnState.NotTurn && this.props.client.nextInterrupt() && this.props.client.nextInterrupt() === TurnInterrupt.DISCARD_FROM_HAND)
         let FLAG_CAN_PICK_PLAYER = (state == TurnState.Play && this.state.playState == PlayState.SelectingChoices
             && NEXT_CHOICE && (NEXT_CHOICE.choice === Choices.PLAYER))
         let FLAG_CAN_PICK_OPPONENT = FLAG_CAN_PICK_PLAYER ||
@@ -195,7 +198,11 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                         {this.props.comp.game.players[this.props.comp.game.activeTurn].name}'s turn
                     </Col>
                     <Col md={2}>
-                        {state == TurnState.NotTurn && (<></>)}
+                        {state == TurnState.NotTurn && (
+                            <>
+                            {(this.props.client.nextInterrupt() && this.props.client.nextInterrupt() === TurnInterrupt.DISCARD_FROM_HAND) && (<h4>Discard a card</h4>)}
+                            </>
+                        )}
                         {state == TurnState.Draw && (<>
                             <Button onClick={() => this.props.client.drawCard()}>Draw Card</Button>
                         </>)}
@@ -372,6 +379,10 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                                 }
                                             } else if (state == TurnState.Discard) {
                                                 this.props.client.discardToHandSize(index)
+                                            } else if (state == TurnState.NotTurn) {
+                                               if (this.props.client.nextInterrupt() && this.props.client.nextInterrupt() === TurnInterrupt.DISCARD_FROM_HAND) {
+                                                   this.props.client.resolveNextInterrupt(index)
+                                               }
                                             }
                                         }}
                                         key={index}

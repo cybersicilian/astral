@@ -1,7 +1,8 @@
-import {CommEnum, GameState} from "../logic/gameplay/server/CommEnum";
+import {CommEnum, GameState} from "../logic/structure/utils/CommEnum";
 import {CardState, PlayerState} from "../logic/gameplay/player/Player";
 import {AbilityChoices} from "../logic/gameplay/cards/choices/AbilityChoices";
 import {UpgradeData} from "../logic/gameplay/player/systems/Upgrade";
+import {TurnInterrupt} from "../logic/structure/utils/TurnInterrupt";
 
 export type ActiveChoices = {
     choice: AbilityChoices[],
@@ -47,6 +48,8 @@ export default class Client {
 
     //these are for extra features down the road
     private upgradeShop: UpgradeData[] = []
+
+    private turnInterrupts: TurnInterrupt[] = []
 
     constructor(name: string) {
         this.name = name
@@ -156,9 +159,34 @@ export default class Client {
                     idInHand: this.activeCard.card,
                     choices: choices
                 }))
-                this.activeCard = undefined
             }
         }
+    }
+
+    //if there are any choices the opponent needs to make, this is where we handle that
+    confirmNextTurn() {
+        if (this.turnInterrupts.length == 0) {
+            //TODO: opponent choices here
+            this.socket.send(JSON.stringify({
+                type: CommEnum.PLAY_PHASE_CONFIRM
+            }))
+        }
+    }
+
+    nextInterrupt() {
+        if (this.turnInterrupts.length > 0) {
+            return this.turnInterrupts[0]
+        } else {
+            return undefined
+        }
+    }
+
+    resolveNextInterrupt(val: string|number) {
+        this.socket.send(JSON.stringify({
+            type: CommEnum.RESOLVE_INTERRUPT,
+            interrupt: this.turnInterrupts.shift(),
+            value: val
+        }))
     }
 
     choiceStr() {
@@ -255,6 +283,7 @@ export default class Client {
         // message is received
         socket.addEventListener("message", event => {
             let body = JSON.parse(event.data as string)
+            console.log(body)
             switch (body.type) {
                 case CommEnum.CONNECTED:
                     this.id = body.connected
@@ -300,6 +329,17 @@ export default class Client {
                     break;
                 case CommEnum.TRANSFER_UPGRADE_SHOP:
                     this.upgradeShop = body.shop
+                    break;
+                case CommEnum.PLAY_PHASE_CONFIRM:
+                    if (this.turnInterrupts.length == 0) {
+                        this.confirmNextTurn()
+                    }
+                    break;
+                case CommEnum.SEND_INTERRUPTS:
+                    this.turnInterrupts = body.interrupts
+                    if (this.turnInterrupts.length == 0) {
+                        this.confirmNextTurn()
+                    }
                     break;
             }
         });

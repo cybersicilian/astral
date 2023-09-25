@@ -1,5 +1,5 @@
-import {PlayerState} from "../player/Player";
-import {Properties} from "../../structure/interfaces/IProppable";
+import {PlayerState} from "../../gameplay/player/Player";
+import {Properties} from "../interfaces/IProppable";
 import {ServerConfig} from "../../../runtime/Server";
 
 export enum CommEnum {
@@ -30,6 +30,9 @@ export enum CommEnum {
     //choices
     GET_CHOICES,
     CHOICE_LIST,
+    PLAY_PHASE_CONFIRM,
+    SEND_INTERRUPTS,
+    RESOLVE_INTERRUPT,
 
     //error codes
     ERROR
