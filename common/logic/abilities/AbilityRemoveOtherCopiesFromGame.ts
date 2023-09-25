@@ -4,20 +4,27 @@ export default class AbilityRemoveOtherCopiesFromGame extends BaseAbility {
     constructor() {
         super(`Remove all other copies of this card from the game`, [], (abilityArgs, madeChoices) => {
             let players = abilityArgs.opps.concat(abilityArgs.owner)
+            let toRemove = []
             for (let player of players) {
-                player.setCiH(player.cih().filter((c) => {
+                toRemove.push(...player.cih().filter((c) => {
                     if (!c || !abilityArgs.card) { return false }
-                    return c.getName() !== abilityArgs.card.getName()
+                    return c.getName() === abilityArgs.card.getName()
                 }))
             }
-            abilityArgs.deck!.set(abilityArgs.deck!.filter((c) => {
+            toRemove.push(...abilityArgs.deck!.discardPile.filter((c) => {
                 if (!c || !abilityArgs.card) { return false }
-                return c.getName() !== abilityArgs.card.getName()
+                return c.getName() === abilityArgs.card.getName()
             }))
-            abilityArgs.deck!.discardPile = abilityArgs.deck!.discardPile.filter((c) => {
+            //from the deck as well
+            toRemove.push(...abilityArgs.deck!.filter((c) => {
                 if (!c || !abilityArgs.card) { return false }
-                return c.getName() !== abilityArgs.card.getName()
+                return c.getName() === abilityArgs.card.getName()
+            }))
+
+            toRemove.forEach((c) => {
+                c.remove()
             })
+
             abilityArgs.card!.skipDiscard()
             abilityArgs.deck!.shuffle()
         })

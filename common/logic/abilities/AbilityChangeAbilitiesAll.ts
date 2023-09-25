@@ -4,6 +4,7 @@ import Card from "../gameplay/cards/Card";
 import Player from "../gameplay/player/Player";
 import {CardArgs} from "../gameplay/cards/CardArgs";
 import {CardAction} from "../structure/utils/Generics";
+import {Zone} from "../gameplay/cards/Zone";
 
 export default class AbilityChangeAbilitiesAll extends BaseAbility {
     constructor(newCard: Card) {
@@ -12,7 +13,8 @@ export default class AbilityChangeAbilitiesAll extends BaseAbility {
         ], (abilityArgs, madeChoices) => {
             let player = madeChoices[0] as Player
             for (let i = 0; i < player.cih().length; i++) {
-                player.cih()[i] = newCard
+                player.cih()[i].setZone(Zone.NONE)
+                player.cih()[i] = newCard.clone().setZone(Zone.HAND)
             }
         })
 

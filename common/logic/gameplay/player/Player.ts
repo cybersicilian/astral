@@ -465,7 +465,12 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
         if (!card.doSkipDiscard()) {
             deck.discardPile.push(card.setZone(Zone.DISCARD))
         } else {
-            card.setZone(Zone.NONE)
+            card.remove({
+                card: card,
+                deck: deck,
+                owner: this,
+                opps: opps
+            })
         }
         card.play(this, opps, deck, choices)
         this.fireEvents("play", {

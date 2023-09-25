@@ -1,6 +1,7 @@
 import BaseAbility from "./core/BaseAbility";
 import {Choices} from "../structure/utils/CardEnums";
 import Player from "../gameplay/player/Player";
+import {Zone} from "../gameplay/cards/Zone";
 
 export default class AbilityDiscardHandDrawCards extends BaseAbility {
     private readonly qty: number;
@@ -25,9 +26,11 @@ export default class AbilityDiscardHandDrawCards extends BaseAbility {
             }
         ], (abilityArgs, madeChoices) => {
             let target = madeChoices.pop() as Player
-            while (target.inHand() > 0) {
-                abilityArgs.deck!.discardPile.push(target.cih().pop())
-            }
+            target.cih().forEach((card) => {
+                card.move(Zone.DISCARD, abilityArgs, {
+                    from: target
+                })
+            })
             target.draw(abilityArgs.deck!, qty + abilityArgs.card!.pow())
         })
 

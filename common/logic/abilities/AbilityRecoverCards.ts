@@ -2,6 +2,7 @@ import BaseAbility from "./core/BaseAbility";
 import {Pointer, Choices} from "../structure/utils/CardEnums";
 import Player from "../gameplay/player/Player";
 import Card from "../gameplay/cards/Card";
+import {Zone} from "../gameplay/cards/Zone";
 
 export default class AbilityRecoverCards extends BaseAbility {
 
@@ -14,8 +15,7 @@ export default class AbilityRecoverCards extends BaseAbility {
                     break;
                 }
                 let choice = madeChoices.pop() as Card
-                abilityArgs.deck!.discardPile.splice(abilityArgs.deck.discardPile!.indexOf(choice), 1)
-                abilityArgs.owner.cih().push(choice)
+                choice.move(Zone.HAND, abilityArgs)
             }
         })
         this.setCanPlay((abilityArgs) => {

@@ -17,13 +17,13 @@ export default class Deck extends Array<Card> {
 
     addCard(card: Card, amt: number = 1) {
         for (let i = 0; i < amt; i++) {
-            this.push(card.clone());
+            this.push(card.clone().setZone(Zone.DECK));
         }
         return this
     }
 
     addCards(cards: Card[]) {
-        this.push(...cards);
+        this.push(...cards.map((card) => card.clone().setZone(Zone.DECK)));
         return this
     }
 
@@ -37,7 +37,7 @@ export default class Deck extends Array<Card> {
     }
 
     reshuffle() {
-        this.push(...this.discardPile);
+        this.push(...this.discardPile.map((card) => card.setZone(Zone.DECK)));
         this.discardPile = [];
         this.shuffle();
     }

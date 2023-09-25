@@ -4,8 +4,8 @@ import Card from "./Card";
 import {ChoiceType} from "./choices/ChoiceType";
 
 export type CardArgs = {
-    owner: Player,
-    opps: Player[],
+    owner?: Player,
+    opps?: Player[],
     deck?: Deck,
     card?: Card,
     choices?: (ChoiceType)[]
