@@ -3,7 +3,7 @@ import Deck from "../../deck/Deck";
 import {CardArgs} from "../../cards/CardArgs";
 import {AbilityChoices} from "../../cards/choices/AbilityChoices";
 import {ChoiceType} from "../../cards/choices/ChoiceType";
-import {AIPointer} from "../../../structure/utils/CardEnums";
+import {Pointer} from "../../../structure/utils/CardEnums";
 import Card from "../../cards/Card";
 import BotType from "./BehaviorProfile";
 
@@ -36,69 +36,69 @@ export default class Bot {
             madeChoices.push(choice.pointer(args));
         } else {
             switch (choice.pointer) {
-                case AIPointer.SELF:
+                case Pointer.SELF:
                     madeChoices.push(args.owner);
                     break;
-                case AIPointer.OPPONENT_MOST_CARDS:
+                case Pointer.OPPONENT_MOST_CARDS:
                     madeChoices.push(...args.opps.sort((a, b) => b.inHand() - a.inHand()));
                     break;
-                case AIPointer.OPPONENT_LEAST_CARDS:
+                case Pointer.OPPONENT_LEAST_CARDS:
                     madeChoices.push(...args.opps.sort((a, b) => a.inHand() - b.inHand()));
                     break;
-                case AIPointer.OPPONENT_RANDOM:
+                case Pointer.OPPONENT_RANDOM:
                     //sort opps randomly
                     let shuffled = args.opps.sort(() => Math.random() - 0.5);
                     madeChoices.push(...shuffled);
                     break;
-                case AIPointer.CARD_IN_DISCARD_LEAST_POWER:
+                case Pointer.CARD_IN_DISCARD_LEAST_POWER:
                     madeChoices.push(...args.deck!.discardPile.sort((a, b) => {
                         if (!a || !b) { return 0; }
                         return a.pow() - b.pow()
                     }));
                     break;
-                case AIPointer.CARD_IN_DISCARD_MOST_POWER:
+                case Pointer.CARD_IN_DISCARD_MOST_POWER:
                     madeChoices.push(...args.deck!.discardPile.sort((a, b) => {
                         if (!a || !b) { return 0; }
                         return b.pow() - a.pow()
                     }));
                     break;
-                case AIPointer.CARD_IN_DISCARD_RANDOM:
+                case Pointer.CARD_IN_DISCARD_RANDOM:
                     madeChoices.push(...args.owner.cih().sort(() => Math.random() - 0.5));
                     break;
-                case AIPointer.CARD_IN_HAND_LEAST_POWER:
+                case Pointer.CARD_IN_HAND_LEAST_POWER:
                     madeChoices.push(...args.owner.cih().sort((a, b) => {
                         if (!a || !b) { return 0; }
                         return a.pow() - b.pow()
                     }));
                     break;
-                case AIPointer.CARD_IN_HAND_MOST_POWER:
+                case Pointer.CARD_IN_HAND_MOST_POWER:
                     madeChoices.push(...args.owner.cih().sort((a, b) => {
                         if (!a || !b) { return 0; }
                         return b.pow() - a.pow()
                     }));
                     break;
-                case AIPointer.CARD_IN_HAND_RANDOM:
+                case Pointer.CARD_IN_HAND_RANDOM:
                     madeChoices.push(...args.owner.cih().sort(() => Math.random() - 0.5));
                     break;
-                case AIPointer.PLAYER_RANDOM:
+                case Pointer.PLAYER_RANDOM:
                     madeChoices.push(...[args.owner, ...args.opps].sort(() => Math.random() - 0.5));
                     break;
-                case AIPointer.PLAYER_MOST_CARDS:
+                case Pointer.PLAYER_MOST_CARDS:
                     madeChoices.push(...[args.owner, ...args.opps].sort((a, b) => b.inHand() - a.inHand()));
                     break;
-                case AIPointer.PLAYER_LEAST_CARDS:
+                case Pointer.PLAYER_LEAST_CARDS:
                     madeChoices.push(...[args.owner, ...args.opps].sort((a, b) => a.inHand() - b.inHand()));
                     break;
-                case AIPointer.PLAYER_MOST_TURNS_REMAINING:
+                case Pointer.PLAYER_MOST_TURNS_REMAINING:
                     madeChoices.push(...[args.owner, ...args.opps].sort((a, b) => b.getTurns() - a.getTurns()));
                     break;
-                case AIPointer.PLAYER_LEAST_TURNS_REMAINING:
+                case Pointer.PLAYER_LEAST_TURNS_REMAINING:
                     madeChoices.push(...[args.owner, ...args.opps].sort((a, b) => a.getTurns() - b.getTurns()));
                     break;
-                case AIPointer.OPPONENT_MOST_TURNS_REMAINING:
+                case Pointer.OPPONENT_MOST_TURNS_REMAINING:
                     madeChoices.push(...args.opps.sort((a, b) => b.getTurns() - a.getTurns()));
                     break;
-                case AIPointer.OPPONENT_LEAST_TURNS_REMAINING:
+                case Pointer.OPPONENT_LEAST_TURNS_REMAINING:
                     madeChoices.push(...args.opps.sort((a, b) => a.getTurns() - b.getTurns()));
                     break;
             }

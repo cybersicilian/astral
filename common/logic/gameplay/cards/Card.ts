@@ -9,7 +9,8 @@ import {IProppable, Properties} from "../../structure/interfaces/IProppable";
 import {ITriggerable} from "../../structure/interfaces/ITriggerable";
 import {IPlayable} from "../../structure/interfaces/IPlayable";
 import {Resolver, ResolverCallback} from "../../structure/utils/Resolver";
-import {AIMeta, AIProfile, AIWeights} from "../ai/AIProfile";
+import {AIProfile, AIWeights} from "../ai/AIProfile";
+import {Zone} from "./Zone";
 
 export default class Card implements IIdentifiable, IProppable, ITriggerable, IPlayable {
     private name: string;
@@ -23,11 +24,92 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
 
     private discardable: boolean = true
 
+    private zone: Zone = Zone.NONE
+
     protected props: Properties = {}
 
     constructor(name: string, abilities: BaseAbility[]) {
         this.name = name;
         this.abilities = abilities;
+    }
+
+    setZone(zone: Zone) {
+        this.zone = zone
+        return this
+    }
+
+    remove(cardArgs: CardArgs) {
+        this.move(Zone.NONE, cardArgs)
+    }
+
+    //the third argument is necessary if we're removing from the hand of a non-owner
+    move(newZone: Zone, cardArgs: CardArgs, props?: {
+        from?: Player,
+        to?: Player
+    }) {
+        let oldZone = this.zone
+        switch (oldZone) {
+            case Zone.DECK:
+                //remove from the deck
+                cardArgs.deck.splice(cardArgs.deck.indexOf(this), 1)
+                break;
+            case Zone.HAND:
+                if (props && props.from) {
+                    //remove from the hand of the player
+                    props.from.cih().splice(props.from.cih().indexOf(this), 1)
+                } else {
+                    //remove from the hand of the owner
+                    cardArgs.owner.cih().splice(cardArgs.owner.cih().indexOf(this), 1)
+                }
+                break;
+            case Zone.DISCARD:
+                //remove from the discard of the owner
+                cardArgs.deck.discardPile.splice(cardArgs.deck.discardPile.indexOf(this), 1)
+                break;
+        }
+
+        this.fireEvents(`moveFrom_${Object.values(Zone)[oldZone]}`, cardArgs)
+        if (newZone !== Zone.NONE) {
+
+            switch (newZone) {
+                case Zone.DECK:
+                case Zone.RANDOM_DECK:
+                    //add to the deck
+                    cardArgs.deck.push(this)
+                    cardArgs.deck.shuffle()
+                    break;
+                case Zone.TOP_DECK:
+                    //add to the top of the deck
+                    cardArgs.deck.unshift(this)
+                    break;
+                case Zone.BOTTOM_DECK:
+                    //add to the bottom of the deck
+                    cardArgs.deck.push(this)
+                    break;
+                case Zone.DISCARD:
+                    //add to the discard pile
+                    cardArgs.deck.discardPile.push(this)
+                    break;
+                case Zone.HAND:
+                    if (props && props.to) {
+                        //add to the hand of the player
+                        props.to.cih().push(this)
+                    } else {
+                        //add to the hand of the owner
+                        cardArgs.owner.cih().push(this)
+                    }
+                    break;
+            }
+
+            this.zone = newZone
+            if (this.zone === Zone.TOP_DECK || this.zone === Zone.BOTTOM_DECK || this.zone === Zone.RANDOM_DECK) {
+                this.zone = Zone.DECK
+            }
+
+            this.fireEvents(`moveTo_${Object.values(Zone)[this.zone]}`, cardArgs)
+        } else {
+            this.zone = newZone
+        }
     }
 
     setCanPlay(canPlay: Resolver<boolean>) {
@@ -149,7 +231,8 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
         return this;
     }
 
-    explode() {
+    explode(args: CardArgs) {
+        this.move(Zone.NONE, args)
         let cards: Card[] = []
         if (this.getProp(`fragment`)) {
             //obliterated

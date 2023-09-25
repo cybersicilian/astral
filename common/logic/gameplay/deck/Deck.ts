@@ -1,5 +1,6 @@
 import Card from "../cards/Card";
 import {Rarity} from "../../structure/utils/CardEnums";
+import {Zone} from "../cards/Zone";
 
 export default class Deck extends Array<Card> {
     discardPile: Card[] = [];
@@ -47,7 +48,7 @@ export default class Deck extends Array<Card> {
             if (this.length === 0) {
                 this.reshuffle();
             }
-            cards.push(this.pop());
+            cards.push(this.pop().setZone(Zone.HAND));
         }
         return cards
     }

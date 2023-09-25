@@ -2,10 +2,11 @@ enum Choices {
     PLAYER,
     OPPONENT,
     CARD_IN_HAND,
-    CARD_IN_DISCARD
+    CARD_IN_DISCARD,
+    CARD
 }
 
-enum AIPointer {
+enum Pointer {
     SELF,
     OPPONENT_MOST_CARDS,
     OPPONENT_LEAST_CARDS,
@@ -35,4 +36,4 @@ enum Rarity {
     HAXOR
 }
 
-export { Choices, AIPointer, Rarity }
+export { Choices, Pointer, Rarity }

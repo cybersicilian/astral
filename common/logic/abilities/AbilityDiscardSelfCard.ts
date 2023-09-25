@@ -1,5 +1,5 @@
 import BaseAbility from "./core/BaseAbility";
-import {AIPointer, Choices} from "../structure/utils/CardEnums";
+import {Pointer, Choices} from "../structure/utils/CardEnums";
 import Player from "../gameplay/player/Player";
 import Card from "../gameplay/cards/Card";
 

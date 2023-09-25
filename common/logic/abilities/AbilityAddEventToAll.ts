@@ -1,6 +1,6 @@
 import BaseAbility from "./core/BaseAbility";
 import {CardArgs} from "../gameplay/cards/CardArgs";
-import {AIPointer, Choices} from "../structure/utils/CardEnums";
+import {Pointer, Choices} from "../structure/utils/CardEnums";
 import Player from "../gameplay/player/Player";
 import {VosEvent} from "../structure/utils/Generics";
 

@@ -1,5 +1,5 @@
 import BaseAbility from "./core/BaseAbility";
-import {AIPointer, Choices} from "../structure/utils/CardEnums";
+import {Pointer, Choices} from "../structure/utils/CardEnums";
 import Player from "../gameplay/player/Player";
 import Card from "../gameplay/cards/Card";
 
@@ -7,7 +7,7 @@ export default class AbilityRecoverCards extends BaseAbility {
 
     constructor(qty: number) {
         super(`Recover {formula} cards`, (abilityArgs) => {
-            return new Array(qty).fill({ choice: Choices.CARD_IN_DISCARD, pointer: AIPointer.CARD_IN_DISCARD_MOST_POWER, distinct: true })
+            return new Array(qty).fill({ choice: Choices.CARD_IN_DISCARD, pointer: Pointer.CARD_IN_DISCARD_MOST_POWER, distinct: true })
         }, (abilityArgs, madeChoices) => {
             while (madeChoices.length > 0) {
                 if (abilityArgs.deck!.discardPile.length == 0) {

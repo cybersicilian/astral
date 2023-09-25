@@ -1,6 +1,6 @@
 import Card from "../cards/Card";
 import AbilityIncreasePower from "../../abilities/AbilityIncreasePower";
-import {AIPointer, Choices, Rarity} from "../../structure/utils/CardEnums";
+import {Pointer, Choices, Rarity} from "../../structure/utils/CardEnums";
 import AbilityDrawCard from "../../abilities/AbilityDrawCard";
 import AbilitySymDraw from "../../abilities/AbilitySymDraw";
 import AbilityDiscardOppCard from "../../abilities/AbilityDiscardOppCard";
@@ -30,6 +30,7 @@ import AbilityUnlockUpgrade from "../../abilities/AbilityUnlockUpgrade";
 import Upgrade from "../player/systems/Upgrade";
 import AbilityAddTurnsOpp from "../../abilities/AbilityAddTurnsOpp";
 import AbilityAntivaxxer from "../../abilities/AbilityAntivaxxer";
+import {Zone} from "../cards/Zone";
 
 const DeckList: { [key: string]: Card[] } = {
     radioactivity_deck: [
@@ -59,7 +60,7 @@ const DeckList: { [key: string]: Card[] } = {
                     let card1 = cards.splice(Math.floor(Math.random() * cards.length), 1)[0]
                     let card2 = cards.splice(Math.floor(Math.random() * cards.length), 1)[0]
                     let newCard = Card.combine(card1, card2)
-                    abilityArgs.owner.cih().push(newCard)
+                    newCard.move(Zone.HAND, abilityArgs)
                 }
             })),
             new AbilityDiscardSelfCard(1)
@@ -68,10 +69,14 @@ const DeckList: { [key: string]: Card[] } = {
             new OnDrawAbility(new AbilityAddEventToSelf(["temp_draw"], (abilityArgs) => {
                 //remove the card you just drew from your hand and explode it
                 let card = abilityArgs.card
-                abilityArgs.owner.setCiH(abilityArgs.owner.cih().filter((c) => c !== card))
-                let new_cards = card!.explode().sort((a, b) => Math.random() - 0.5)
-                abilityArgs.owner.cih().push(new_cards.pop())
-                abilityArgs.deck!.discardPile.push(...new_cards)
+                let new_cards = card!.explode(abilityArgs).sort((a, b) => Math.random() - 0.5)
+                new_cards.forEach((c, i) => {
+                    if (i == 0) {
+                        c.move(Zone.HAND, abilityArgs)
+                    } else {
+                        c.move(Zone.DISCARD, abilityArgs)
+                    }
+                })
             }).setText("The next card you draw explodes. Keep one fragment at random, and discard the rest.")),
             new AbilityDiscardSelfCard(1)
         ]).setRarity(Rarity.RARE).setProp("radioactive", true)
@@ -93,7 +98,7 @@ const DeckList: { [key: string]: Card[] } = {
             new PlayerRestrictionAbility("gene_bank"),
             new AbilityAddResource(5, "knowledge"),
             new BaseAbility(`Analyze a card in the discard pile to add its DNA to the gene bank.`, [
-                {choice: Choices.CARD_IN_DISCARD, pointer: AIPointer.CARD_IN_DISCARD_RANDOM}
+                {choice: Choices.CARD_IN_DISCARD, pointer: Pointer.CARD_IN_DISCARD_RANDOM}
             ], (abilityArgs, madeChoices) => {
                 if (!abilityArgs.owner.getProp("dna_research")) {
                     abilityArgs.owner.setProp("dna_research", [], abilityArgs)
@@ -126,7 +131,7 @@ const DeckList: { [key: string]: Card[] } = {
         new Card(`Grenade`, [
             new PlayerRestrictionAbility("explosives"),
             new BaseAbility("Explode a card at random in an opponents hand, then they discard half that many cards at random.", [
-                {choice: Choices.OPPONENT, pointer: AIPointer.OPPONENT_LEAST_CARDS},
+                {choice: Choices.OPPONENT, pointer: Pointer.OPPONENT_LEAST_CARDS},
             ], (abilityArgs, madeChoices) => {
                 let opponent = madeChoices[0] as Player
                 //explode a card at random
@@ -135,10 +140,19 @@ const DeckList: { [key: string]: Card[] } = {
                     //remove it from their cards in hand
                     opponent.setCiH(opponent.cih().filter((c) => c !== card))
                     //explode it
-                    let new_cards = card.explode()
+                    let new_cards = card.explode({
+                        owner: opponent,
+                        opps: [...abilityArgs.opps, abilityArgs.owner].filter((p) => p !== opponent),
+                        deck: abilityArgs.deck,
+                        card: card
+                    })
                     let toDiscard = Math.ceil(new_cards.length / 2)
                     //add new cards to the opponents hand
-                    opponent.cih().push(...new_cards)
+                    new_cards.forEach((c, i) => {
+                        c.move(Zone.HAND, abilityArgs, {
+                            to: opponent
+                        })
+                    })
                     //discard half that many cards at random
                     for (let i = 0; i < toDiscard; i++) {
                         opponent.discardChoose(abilityArgs)
@@ -156,8 +170,10 @@ const DeckList: { [key: string]: Card[] } = {
                 let cards = abilityArgs.deck!.discardPile
                 abilityArgs.deck!.discardPile = []
                 for (let card of cards) {
-                    let new_cards = card.explode()
-                    abilityArgs.deck!.discardPile.push(...new_cards)
+                    let new_cards = card.explode(abilityArgs)
+                    new_cards.forEach((c, i) => {
+                        c.move(Zone.DISCARD, abilityArgs)
+                    })
                 }
             }).sai({
                 changesGame: 1,
@@ -206,8 +222,10 @@ const DeckList: { [key: string]: Card[] } = {
                 let cards = abilityArgs.deck!.discardPile
                 abilityArgs.deck!.discardPile = []
                 for (let card of cards) {
-                    let new_cards = card.explode()
-                    abilityArgs.deck!.discardPile.push(...new_cards)
+                    let new_cards = card.explode(abilityArgs)
+                    new_cards.forEach((c, i) => {
+                        c.move(Zone.DISCARD, abilityArgs)
+                    })
                 }
             }).sai({
                 changesGame: 1,
@@ -234,10 +252,9 @@ const DeckList: { [key: string]: Card[] } = {
                             //choose 2 random cards
                             let randos = cardArgs.owner.cih().sort(() => Math.random() - 0.5).slice(0, 2)
                             let newCard = Card.combine(...randos)
+                            randos.forEach((c) => c.remove(cardArgs))
                             newCard.setProp(`hybrid`, true)
-                            cardArgs.owner.cih().push(newCard)
-                            cardArgs.owner.cih().splice(cardArgs.owner.cih().indexOf(randos[0]), 1)
-                            cardArgs.owner.cih().splice(cardArgs.owner.cih().indexOf(randos[1]), 1)
+                            newCard.move(Zone.HAND, cardArgs)
                         }
                     }
                 })
@@ -487,7 +504,7 @@ const DeckList: { [key: string]: Card[] } = {
         new Card(`Chomp`, [
             new AbilityZombieRestriction(),
             new BaseAbility(`Deal {formula} damage to an opponent. They discard that many cards.`, [
-                {pointer: AIPointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
+                {pointer: Pointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
             ], (abilityArgs, madeChoices) => {
                 let opponent = madeChoices[0] as Player
                 let dmg = abilityArgs.card!.pow() * 5
@@ -529,34 +546,10 @@ const DeckList: { [key: string]: Card[] } = {
             new AbilityExplodeCard(),
             new AbilityIncreasePower(2)
         ]).setRarity(Rarity.RARE),
-        new Card(`Zombie Sutures`, [
-            new AbilityZombieRestriction(),
-            new BaseAbility(`Combine the top three non-sutured cards in the discard pile, then add it to your hand {formula} times`, [], (abilityArgs, madeChoices) => {
-                //combine all the cards in the discard pile, and then empty it
-                let cards = abilityArgs.deck!.discardPile.filter((card) => card && card !== abilityArgs.card && !card.getProp("sutured"))
-                //select the top three cards from the discard
-                cards = cards.slice(0, 3)
-                if (cards.length > 0) {
-                    let newCard = new Card(`Sutured ${cards.map((card) => card.clone().getName()).join("-")}`, [
-                        ...cards.map((card) => {
-                            return card.clone().getAbilities()
-                        }).flat()
-                    ]).setRarity(Rarity.HAXOR).setProp("sutured", true)
-                    //remove the chosen cards from the discard pile
-                    abilityArgs.deck!.discardPile = abilityArgs.deck!.discardPile.filter((card) => {
-                        return !cards.includes(card)
-                    })
-                    //add it to hand {pow} times
-                    for (let i = 0; i < abilityArgs.card!.pow(); i++) {
-                        abilityArgs.owner.cih().push(newCard.clone())
-                    }
-                }
-            }).setFormula(`{pow}`)
-        ]),
         new Card(`Rot Brains`, [
             new AbilityZombieRestriction(),
             new BaseAbility(`Zombify half the cards in an opponents hand. (They can't play them unless they are a zombie)`, [
-                    {choice: Choices.OPPONENT, pointer: AIPointer.OPPONENT_MOST_CARDS}
+                    {choice: Choices.OPPONENT, pointer: Pointer.OPPONENT_MOST_CARDS}
                 ], (abilityArgs, madeChoices) => {
                     //add the zombie restriction to half the cards at random in an opponents hand.
                     let opponent = madeChoices[0] as Player
@@ -568,7 +561,7 @@ const DeckList: { [key: string]: Card[] } = {
                         ordered[i] = new Card(`Zombified ${ordered[i].getName()}`, [
                             new AbilityZombieRestriction(),
                             ...ordered[i].getAbilities()
-                        ]).setPow(ordered[i].pow()).setRarity(ordered[i].getRarity()).setProps({zombie: true, ...ordered[i].getProps()})
+                        ]).setPow(ordered[i].pow()).setRarity(ordered[i].getRarity()).setProps({zombie: true, ...ordered[i].getProps()}).setZone(Zone.HAND)
                     }
                     //update the opponents hand
                     opponent.setCiH(ordered)
@@ -689,6 +682,8 @@ const DeckList: { [key: string]: Card[] } = {
                         allCards.push(player.cih().pop())
                     }
                 }
+                //shuffle the pile
+                allCards = allCards.sort(() => Math.random() - 0.5)
                 //evenly distribute them to all players, starting with owner
                 let ctr = 0;
                 while (allCards.length > 0) {
@@ -799,7 +794,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.COMMON),
         new Card(`Assassinate`, [
             new BaseAbility(`Kill an opponent. They discard their hand.`, [
-                {pointer: AIPointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
+                {pointer: Pointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
             ], (abilityArgs, madeChoices) => {
                 let opponent = madeChoices[0] as Player
                 opponent.setProp("res_life", 0, abilityArgs)
@@ -833,7 +828,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.RARE),
         new Card("Pointlessify", [
             new BaseAbility("Reduce all point values in an opponents hand to -1. Gain points equal to the difference.", [{
-                pointer: AIPointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT
+                pointer: Pointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT
             }
             ], (abilityArgs, madeChoices) => {
                 let opponent = madeChoices[0] as Player
@@ -884,7 +879,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.RARE),
         new Card(`Oozify`, [
             new BaseAbility(`Choose a card in your hand. Split it into {formula} weaker cards.`, [
-                {pointer: AIPointer.CARD_IN_HAND_MOST_POWER, choice: Choices.CARD_IN_HAND}
+                {pointer: Pointer.CARD_IN_HAND_MOST_POWER, choice: Choices.CARD_IN_HAND}
             ], (a, m) => {
                 let card = m[0] as Card
                 let cards = []
@@ -895,8 +890,8 @@ const DeckList: { [key: string]: Card[] } = {
                     cards.push(newCard)
                 }
                 //remove the old card
-                a.owner.cih().splice(a.owner.cih().indexOf(card), 1)
-                a.owner.cih().push(...cards)
+                card.remove(a)
+                cards.forEach((card) => { card.move(Zone.HAND, c) })
             }).setCanPlay((c) => {
                 return c.owner.cih().length > 1
             }).setFormula(`{pow} + 1`)
@@ -935,7 +930,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.UNCOMMON),
         new Card(`Skip Bitch`, [
             new BaseAbility(`Skip an opponents turn`, [
-                {pointer: AIPointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
+                {pointer: Pointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
             ], (abilityArgs, madeChoices) => {
                 let opponent = madeChoices[0] as Player
                 opponent.skip()
@@ -943,7 +938,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.UNCOMMON),
         new Card(`Megaskip Bitch`, [
             new BaseAbility(`Skip an opponents next {formula} turns`, [
-                {pointer: AIPointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
+                {pointer: Pointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
             ], (abilityArgs, madeChoices) => {
                 let opponent = madeChoices[0] as Player
                 opponent.skip()
@@ -970,7 +965,7 @@ const DeckList: { [key: string]: Card[] } = {
             new AbilityDiscardOppCard(2),
             new AbilityDiscardSelfCard(3),
             new BaseAbility(`Make an opponent skip a turn`, [
-                {pointer: AIPointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
+                {pointer: Pointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
             ], (abilityArgs, madeChoices) => {
                 let opponent = madeChoices[0] as Player
                 opponent.skip()
@@ -1010,7 +1005,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.BASIC),
         new Card(`Encrust in Gold`, [
             new BaseAbility(`Increase a card in your hands rarity. It gains {formula} power`, [
-                {choice: Choices.CARD_IN_HAND, pointer: AIPointer.CARD_IN_HAND_LEAST_POWER}
+                {choice: Choices.CARD_IN_HAND, pointer: Pointer.CARD_IN_HAND_LEAST_POWER}
             ], (a, c) => {
                 let card = c[0] as Card
                 card.setRarity(card.getRarity() + 1)
@@ -1046,7 +1041,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.UNCOMMON),
         new Card(`Denial`, [
             new BaseAbility(`Increase an opponent's cards to play to win by {formula}`, [
-                {choice: Choices.OPPONENT, pointer: AIPointer.OPPONENT_LEAST_TURNS_REMAINING}
+                {choice: Choices.OPPONENT, pointer: Pointer.OPPONENT_LEAST_TURNS_REMAINING}
             ], (a, m) => {
                 let opp = m[0] as Player
                 opp.addTurns(a.card!.pow() * 2)
@@ -1068,7 +1063,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.COMMON),
         new Card(`Beanz It`, [
             new BaseAbility(`Add "Add {formula} turns to an opponent" to a card in your hand.`, [
-                {choice: Choices.CARD_IN_HAND, pointer: AIPointer.CARD_IN_HAND_RANDOM}
+                {choice: Choices.CARD_IN_HAND, pointer: Pointer.CARD_IN_HAND_RANDOM}
             ], (a, m) => {
                 let card = m[0] as Card
                 card.setName(`Bean-Fueled ${card.getName()} 🫘`)
@@ -1077,7 +1072,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.COMMON),
         new Card(`Community Service Project`, [
             new BaseAbility(`Add "Draw {formula} card" to a card in your hand.`, [
-                {choice: Choices.CARD_IN_HAND, pointer: AIPointer.CARD_IN_HAND_RANDOM}
+                {choice: Choices.CARD_IN_HAND, pointer: Pointer.CARD_IN_HAND_RANDOM}
             ], (a, m) => {
                 let card = m[0] as Card
                 card.setName(`Wizened ${card.getName()}`)

@@ -1,6 +1,7 @@
 import BaseAbility from "./core/BaseAbility";
-import {AIPointer, Choices} from "../structure/utils/CardEnums";
+import {Pointer, Choices} from "../structure/utils/CardEnums";
 import Card from "../gameplay/cards/Card";
+import {Zone} from "../gameplay/cards/Zone";
 
 export default class AbilityExplodeCard extends BaseAbility {
     constructor() {
@@ -8,7 +9,7 @@ export default class AbilityExplodeCard extends BaseAbility {
             {
                 choice: Choices.CARD_IN_HAND,
                 distinct: true,
-                pointer: AIPointer.CARD_IN_HAND_MOST_POWER,
+                pointer: Pointer.CARD_IN_HAND_MOST_POWER,
                 restriction: (card) => {
                     //choose a card that isn't a fragment
                     return !card.card.getProp("fragment")
@@ -17,9 +18,10 @@ export default class AbilityExplodeCard extends BaseAbility {
         ], (abilityArgs, madeChoices) => {
             //to explode a card, remove it from the game, then for each ability on it, create a new card with only that ability.
             let card = madeChoices[0] as Card
-            abilityArgs.owner.setCiH(abilityArgs.owner.cih().filter((c) => c !== card))
-            let new_cards = card.explode()
-            abilityArgs.owner.cih().push(...new_cards)
+            let new_cards = card.explode(abilityArgs)
+            new_cards.forEach((card) => {
+                card.move(Zone.HAND, abilityArgs)
+            })
         })
 
         this.sai({

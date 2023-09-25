@@ -12,6 +12,7 @@ import {CardAction, VosEvent} from "../../structure/utils/Generics";
 import {AbilityChoices} from "../cards/choices/AbilityChoices";
 import Bot from "./bots/Bot";
 import BotType from "./bots/BehaviorProfile";
+import {Zone} from "../cards/Zone";
 
 //these shouldn't be here, but I'm too lazy to move them
 export type CardState = {
@@ -462,7 +463,9 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
         //remove it from the hand
         this.cards.splice(this.cards.indexOf(card), 1)
         if (!card.doSkipDiscard()) {
-            deck.discardPile.push(card)
+            deck.discardPile.push(card.setZone(Zone.DISCARD))
+        } else {
+            card.setZone(Zone.NONE)
         }
         card.play(this, opps, deck, choices)
         this.fireEvents("play", {
@@ -493,7 +496,7 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
             deck: deck,
             card: card
         })
-        deck.discardPile.push(card)
+        deck.discardPile.push(card.setZone(Zone.DISCARD))
         this.cards.splice(this.cards.indexOf(card), 1)
     }
 

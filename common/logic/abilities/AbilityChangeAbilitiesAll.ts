@@ -1,5 +1,5 @@
 import BaseAbility from "./core/BaseAbility";
-import {AIPointer, Choices} from "../structure/utils/CardEnums";
+import {Pointer, Choices} from "../structure/utils/CardEnums";
 import Card from "../gameplay/cards/Card";
 import Player from "../gameplay/player/Player";
 import {CardArgs} from "../gameplay/cards/CardArgs";
@@ -8,7 +8,7 @@ import {CardAction} from "../structure/utils/Generics";
 export default class AbilityChangeAbilitiesAll extends BaseAbility {
     constructor(newCard: Card) {
         super(`Each card in an opponent's hand becomes ${newCard.getName()}`, [
-            {choice: Choices.OPPONENT, pointer: AIPointer.OPPONENT_MOST_CARDS}
+            {choice: Choices.OPPONENT, pointer: Pointer.OPPONENT_MOST_CARDS}
         ], (abilityArgs, madeChoices) => {
             let player = madeChoices[0] as Player
             for (let i = 0; i < player.cih().length; i++) {
