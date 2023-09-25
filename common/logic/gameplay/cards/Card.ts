@@ -153,7 +153,7 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
     }
 
     getProps() {
-        return this.props
+        return {...this.props, zone: this.zone, power: this.power}
     }
 
     getProp(prop: string) {
