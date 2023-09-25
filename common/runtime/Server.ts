@@ -406,7 +406,7 @@ export default class GameServer {
                 let result = JSON.parse(message as string)
                 let id = result.id
                 let opps = Object.keys(server.players).filter(key => key !== id).map(key => server.players[key])
-                console.log(message as string)
+                console.log(result)
                 switch (result.type) {
                     case CommEnum.SET_NAME:
                         if (result.name.length < 1) {
@@ -574,7 +574,7 @@ export default class GameServer {
                         break;
                     case CommEnum.PLAY_PHASE_CONFIRM:
                         server.nextTurn[id] = true
-                        if (!server.players[id].noInterrupts() || !server.players[id].isBot()) {
+                        if (!server.players[id].noInterrupts() && !server.players[id].isBot()) {
                             server.nextTurn[id] = false
                             server.updateInterrupts(id)
                         } else if (Object.keys(server.nextTurn).every((e) => {
