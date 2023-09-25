@@ -875,26 +875,8 @@ const DeckList: { [key: string]: Card[] } = {
     basic: [
         new Card(`Just Do Better`, [
             new AbilityAddDeck("romance", 75, true).setText(`Invent romance. Add it to the game.`),
-            new AbilityAddResource(5, "love")
-        ]).setRarity(Rarity.RARE),
-        new Card(`Oozify`, [
-            new BaseAbility(`Choose a card in your hand. Split it into {formula} weaker cards.`, [
-                {pointer: Pointer.CARD_IN_HAND_MOST_POWER, choice: Choices.CARD_IN_HAND}
-            ], (a, m) => {
-                let card = m[0] as Card
-                let cards = []
-                for (let i = 0; i < a.card.pow() + 1; i++) {
-                    let newCard = card.clone().setPow(Math.floor(1 / a.card!.pow() * card.pow()));
-                    newCard.setName(`Oozing ${newCard.getName()}`)
-                    newCard.setRarity(Math.max(0, newCard.getRarity() - 1))
-                    cards.push(newCard)
-                }
-                //remove the old card
-                card.remove(a)
-                cards.forEach((card) => { card.move(Zone.HAND, c) })
-            }).setCanPlay((c) => {
-                return c.owner.cih().length > 1
-            }).setFormula(`{pow} + 1`)
+            new AbilityAddResource(5, "love"),
+            new AbilityRemoveOtherCopiesFromGame()
         ]).setRarity(Rarity.RARE),
         new Card(`You Could Make a Religion Outta This`, [
             new AbilityAddDeck(`faith_deck`, 75, true).setText("Invent religion."),
@@ -973,12 +955,7 @@ const DeckList: { [key: string]: Card[] } = {
             new AbilityDrawCard(1)
         ]).setRarity(Rarity.MYTHIC),
         new Card(`⚡⚡ Supercharge ⚡⚡`, [
-            new AbilityIncreasePower(0),
-            new BaseAbility(`⚡⚡`, [], (a, m) => {
-                let card = m[0] as Card
-                card.setName(`Empowered ${card.getName()}`)
-            }).setFormula(`{pow}`)
-
+            new AbilityIncreasePower(0)
         ]).setRarity(Rarity.UNCOMMON),
         new Card(`Gifts of Giving`, [
             new AbilityDrawCard(1),
