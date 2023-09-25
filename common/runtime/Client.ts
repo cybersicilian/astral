@@ -161,6 +161,8 @@ export default class Client {
                 }))
             }
         }
+        //disable this when we fix the interruption logic
+        this.activeCard = undefined
     }
 
     //if there are any choices the opponent needs to make, this is where we handle that
