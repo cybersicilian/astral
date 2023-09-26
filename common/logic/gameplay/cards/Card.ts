@@ -153,7 +153,7 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
     }
 
     getProps() {
-        return {...this.props, zone: this.zone, power: this.power}
+        return {...this.props}
     }
 
     getProp(prop: string) {
@@ -195,8 +195,20 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
         return this.abilities;
     }
 
+    getDisplayName() {
+        let powStr = "";
+        if (this.pow() !== 1) {
+            if (this.pow() > 1) {
+                powStr = ` +${this.pow() - 1}`
+            } else if (this.pow() < 1) {
+                powStr = ` ${this.pow()-1}`
+            }
+        }
+        return this.getName() + powStr;
+    }
+
     getName() {
-        return this.name;
+        return this.name
     }
 
     setName(name: string) {

@@ -227,7 +227,7 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
 
     getCards(opps: Player[], deck: Deck): CardState[] {
         return this.cards.map(x => ({
-            name: x.getName(),
+            name: x.getDisplayName(),
             text: x.getFormulatedText({
                 owner: this,
                 opps: opps,

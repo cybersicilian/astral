@@ -26,11 +26,9 @@ export default class AbilityDiscardHandDrawCards extends BaseAbility {
             }
         ], (abilityArgs, madeChoices) => {
             let target = madeChoices.pop() as Player
-            target.cih().forEach((card) => {
-                card.move(Zone.DISCARD, abilityArgs, {
-                    from: target
-                })
-            })
+            while (target.cih().length > 0) {
+                target.discardRandom(abilityArgs)
+            }
             target.draw(abilityArgs.deck!, qty + abilityArgs.card!.pow())
         })
 

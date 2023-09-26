@@ -1,4 +1,4 @@
-import {CommEnum, GameState} from "../logic/gameplay/server/CommEnum";
+import {CommEnum, GameState} from "../logic/structure/utils/CommEnum";
 import {CardState, PlayerState} from "../logic/gameplay/player/Player";
 import {AbilityChoices} from "../logic/gameplay/cards/choices/AbilityChoices";
 import {UpgradeData} from "../logic/gameplay/player/systems/Upgrade";
@@ -233,18 +233,19 @@ export default class Client {
     }
 
     connect(connStr: string) {
-        if (connStr === "") {
-            connStr = "localhost"
-        }
-        //if there's no port, add the default port 15912
-        if (!connStr.includes(":")) {
-            connStr += ":15912"
-        }
+        // if (connStr === "") {
+        //     connStr = "localhost"
+        // }
+        // //if there's no port, add the default port 15912
+        // if (!connStr.includes(":")) {
+        //     connStr += ":15912"
+        // }
         //if we're not on localhost, see if it starts with wss://
-        if (!connStr.startsWith("localhost") && !connStr.startsWith("wss://")) {
-            connStr = "wss://" + connStr
-        } else if (!connStr.startsWith("ws://")) {
+        if (!connStr.startsWith("ws://") && !connStr.startsWith("wss://")) {
             connStr = "ws://" + connStr
+        }
+        if (connStr.length == 0) {
+            connStr = "wss://vos-server.onrender.com"
         }
         this.init(new WebSocket(connStr))
     }

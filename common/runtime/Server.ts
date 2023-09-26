@@ -1,7 +1,7 @@
 import Player from "../logic/gameplay/player/Player";
 import Deck from "../logic/gameplay/deck/Deck";
 import DeckList from "../logic/gameplay/deck/DeckList";
-import {CommEnum} from "../logic/gameplay/server/CommEnum";
+import {CommEnum} from "../logic/structure/utils/CommEnum";
 import {Choices} from "../logic/structure/utils/CardEnums";
 import Upgrade from "../logic/gameplay/player/systems/Upgrade";
 import {CardArgs} from "../logic/gameplay/cards/CardArgs";
@@ -330,7 +330,7 @@ export default class GameServer {
                     config: this.serverConfig,
                     logs: this.sendableLogs.map(x => x.toString()),
                     discard: this.deck.discardPile.map(x => ({
-                        name: x.getName(),
+                        name: x.getDisplayName(),
                         text: x.getFormulatedText({
                             owner: this.players[id],
                             opps: opps,
@@ -467,7 +467,7 @@ export default class GameServer {
                                     opps: opps,
                                     deck: server.deck,
                                     card: choiceCard
-                                })
+                                }),
                             }))
                             ws.send(result)
                         } else if (server.activeTurn === id) {

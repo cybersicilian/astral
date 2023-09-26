@@ -1,4 +1,5 @@
 import BaseAbility from "./core/BaseAbility";
+import Card from "../gameplay/cards/Card";
 
 export default class AbilityRemoveOtherCopiesFromGame extends BaseAbility {
     constructor() {
@@ -21,8 +22,8 @@ export default class AbilityRemoveOtherCopiesFromGame extends BaseAbility {
                 return c.getName() === abilityArgs.card.getName()
             }))
 
-            toRemove.forEach((c) => {
-                c.remove()
+            toRemove.forEach((c: Card) => {
+                c.remove(abilityArgs)
             })
 
             abilityArgs.card!.skipDiscard()

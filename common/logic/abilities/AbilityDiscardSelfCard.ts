@@ -7,8 +7,10 @@ export default class AbilityDiscardSelfCard extends BaseAbility {
 
     constructor(qty: number) {
         super(`Discard {formula} cards at random`, [], (abilityArgs, madeChoices) => {
+            for (let i = 0; i < this.calcFormula(abilityArgs); i++) {
                 abilityArgs.owner.discardRandom(abilityArgs)
-            })
+            }
+        })
 
         this.sai({
             affectsSelf: (cardArgs) => cardArgs.card.pow() + qty,
