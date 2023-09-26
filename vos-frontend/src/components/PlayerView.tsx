@@ -142,8 +142,9 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                 } else {
                     //play the selected card with the selected choices
                     this.props.client.playActiveCard()
-                    this.setState({playState: PlayState.NotPlaying})
                 }
+            } else {
+                this.setState({playState: PlayState.NotPlaying})
             }
             if (this.props.comp.game.turnPhase == 3) {
                 state = TurnState.Discard
