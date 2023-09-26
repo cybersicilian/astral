@@ -8,6 +8,7 @@ import PlayerCard from "./PlayerCard";
 import {Choices} from "vos-common/logic/structure/utils/CardEnums";
 import LogEntry from "./LogEntry";
 import UpgradeShop from "./UpgradeShop";
+import {TurnInterrupt} from "vos-common/logic/structure/utils/TurnInterrupt";
 
 
 type PlayerViewProps = {
@@ -195,7 +196,13 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                         {this.props.comp.game.players[this.props.comp.game.activeTurn].name}'s turn
                     </Col>
                     <Col md={2}>
-                        {state == TurnState.NotTurn && (<></>)}
+                        {state == TurnState.NotTurn && (<>
+                            {this.props.client.remainingInterrupts() > 0 && (<>
+                                <h4>
+                                    Discard {this.props.client.remainingInterrupts()} more card{this.props.client.remainingInterrupts() > 1 ? "s" : ""}
+                                </h4>
+                            </>)}
+                        </>)}
                         {state == TurnState.Draw && (<>
                             <Button onClick={() => this.props.client.drawCard()}>Draw Card</Button>
                         </>)}
@@ -351,9 +358,9 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                             this.props.comp.cards.map((card: CardState, index: number) => {
                                 return (
                                     <CardView
-                                        chooseable={FLAG_CAN_PICK_CARD_IN_HAND &&
-                                            !(this.state.playState == PlayState.SelectingChoices && index == this.state.selectedCardForPlaying) &&
-                                            (card.playable || !(this.state.playState == PlayState.SelectingCard && state == TurnState.Play))}
+                                        chooseable={(FLAG_CAN_PICK_CARD_IN_HAND &&
+                                            ((!(this.state.playState == PlayState.SelectingChoices && index == this.state.selectedCardForPlaying) && (card.playable || !(this.state.playState == PlayState.SelectingCard && state == TurnState.Play))))) ||
+                                            ((state == TurnState.NotTurn && this.props.comp.player.interrupts.length > 0 && !this.props.client.choseInterrupt(index)))}
                                         onChoose={(card) => {
                                             if (state == TurnState.Give) {
                                                 this.setState({
@@ -372,6 +379,9 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                                 }
                                             } else if (state == TurnState.Discard) {
                                                 this.props.client.discardToHandSize(index)
+                                            } else if (state == TurnState.NotTurn) {
+                                                this.props.client.addInterrupt(index)
+                                                this.setState({})
                                             }
                                         }}
                                         key={index}

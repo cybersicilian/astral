@@ -8,11 +8,11 @@ import {IIdentifiable} from "../../structure/interfaces/IIdentifiable";
 import {ChoiceType} from "../cards/choices/ChoiceType";
 import {IProppable, Properties} from "../../structure/interfaces/IProppable";
 import {EventCluster, IEventable} from "../../structure/interfaces/IEventable";
-import {CardAction, VosEvent} from "../../structure/utils/Generics";
 import {AbilityChoices} from "../cards/choices/AbilityChoices";
 import Bot from "./bots/Bot";
 import BotType from "./bots/BehaviorProfile";
 import {Zone} from "../cards/Zone";
+import {TurnInterrupt} from "../../structure/utils/TurnInterrupt";
 
 //these shouldn't be here, but I'm too lazy to move them
 export type CardState = {
@@ -35,7 +35,8 @@ export type PlayerState = {
     you: boolean,
     host: boolean,
     order: number,
-    winReason: string
+    winReason: string,
+    interrupts: TurnInterrupt[]
 }
 
 export default class Player implements IIdentifiable, IProppable, IEventable {
@@ -59,6 +60,8 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
     private host: boolean = false
 
     private botProfile?: Bot = undefined
+
+    private resolveBeforeTurn: TurnInterrupt[] = []
 
 
     private eventList: {
@@ -221,7 +224,8 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
             winReason: this.winReason,
             host: this.host,
             you: you,
-            order: this.turnPlacement
+            order: this.turnPlacement,
+            interrupts: this.resolveBeforeTurn
         }
     }
 
@@ -406,7 +410,8 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
             winReason: this.winReason,
             host: this.host,
             you: false,
-            order: this.turnPlacement
+            order: this.turnPlacement,
+            interrupts: this.resolveBeforeTurn
         }
     }
 
@@ -512,14 +517,37 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
         }
     }
 
-    discardChoose(cardArgs: CardArgs) {
-        //TODO: allow player choice
-        let card = this.weightedDiscard(cardArgs)
-        if (card) {
-            this.discard(card, cardArgs.deck!)
-        } else {
+    discardHand(cardArgs: CardArgs) {
+        while (this.cih().length > 0) {
             this.discardRandom(cardArgs)
         }
+    }
+
+    discardChoose(cardArgs: CardArgs) {
+        //TODO: allow player choice
+        if (this.isBot()) {
+            let card = this.weightedDiscard(cardArgs)
+            if (card) {
+                this.discard(card, cardArgs.deck!)
+            } else {
+                this.discardRandom(cardArgs)
+            }
+        } else {
+            this.resolveBeforeTurn.push(TurnInterrupt.DISCARD_FROM_HAND)
+        }
+    }
+
+    hasInterrupts() {
+        return this.resolveBeforeTurn.length > 0
+    }
+
+    getInterrupts() {
+        return this.resolveBeforeTurn
+    }
+
+    clearInterrupts() {
+        this.resolveBeforeTurn = []
+        return this
     }
 
     randomCard() {

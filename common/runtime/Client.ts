@@ -2,6 +2,7 @@ import {CommEnum, GameState} from "../logic/structure/utils/CommEnum";
 import {CardState, PlayerState} from "../logic/gameplay/player/Player";
 import {AbilityChoices} from "../logic/gameplay/cards/choices/AbilityChoices";
 import {UpgradeData} from "../logic/gameplay/player/systems/Upgrade";
+import {TurnInterrupt} from "../logic/structure/utils/TurnInterrupt";
 
 export type ActiveChoices = {
     choice: AbilityChoices[],
@@ -47,9 +48,15 @@ export default class Client {
 
     //these are for extra features down the road
     private upgradeShop: UpgradeData[] = []
+    private activeInterrupts: TurnInterrupt[] = []
+    private collectedInterrupts: (string|number)[] = []
 
     constructor(name: string) {
         this.name = name
+    }
+
+    remainingInterrupts() {
+        return this.activeInterrupts.length - this.collectedInterrupts.length
     }
 
     state(): CompositeState {
@@ -76,6 +83,42 @@ export default class Client {
         this.onActiveCardSet = () => {
             handler()
         }
+    }
+
+    getInterrupts() {
+        return this.activeInterrupts
+    }
+
+    sendInterrupts(results: (string|number)[]) {
+        if (results.length !== this.activeInterrupts.length) {
+            //invalid interrupts
+            return false;
+        } else {
+            this.socket?.send(JSON.stringify({
+                type: CommEnum.RESOLVE_INTERRUPT,
+                id: this.id,
+                interrupts: results
+            }))
+            return true;
+        }
+    }
+
+    sendCollectedInterrupts() {
+        this.sendInterrupts(this.collectedInterrupts)
+        this.collectedInterrupts = [];
+        this.activeInterrupts = [];
+    }
+
+    addInterrupt(i: (string|number)) {
+        this.collectedInterrupts.push(i)
+        if (this.collectedInterrupts.length >= this.activeInterrupts.length) {
+            this.sendCollectedInterrupts()
+        }
+        return this;
+    }
+
+    choseInterrupt(i: (string|number)) {
+        return this.collectedInterrupts.indexOf(i) >= 0
     }
 
     addBot() {
@@ -297,6 +340,9 @@ export default class Client {
                     if (this.onActiveCardSet) {
                         this.onActiveCardSet()
                     }
+                    break;
+                case CommEnum.SEND_INTERRUPTS:
+                    this.activeInterrupts = body.interrupts
                     break;
                 case CommEnum.TRANSFER_UPGRADE_SHOP:
                     this.upgradeShop = body.shop

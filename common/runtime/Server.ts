@@ -12,6 +12,8 @@ import {ChoiceType} from "../logic/gameplay/cards/choices/ChoiceType";
 import { WebSocketServer } from "ws";
 import BotType from "../logic/gameplay/player/bots/BehaviorProfile";
 import {adjustAIWeights} from "./dummies/ai_heuristics";
+import {TurnInterrupt} from "../logic/structure/utils/TurnInterrupt";
+import Card from "../logic/gameplay/cards/Card";
 
 export type ServerConfig = {
     startingHand: number, //4
@@ -131,6 +133,28 @@ export default class GameServer {
     }
 
     incrementPhase() {
+        //we iterate over every player and see if they have any interrupts
+        //if they do, we send them a message with their interrupts to resolve using the SEND_INTERRUPTS signal
+        //they need to return an array of valid indices using the RESOLVE_INTERRUPTS signal
+        //we process it, clear their interrupts, and repeat this process
+        let increment = true
+        for (let id of Object.keys(this.players)) {
+            //bots resolve interrupts automatically
+            if (this.players[id].hasInterrupts() && !this.players[id].isBot()) {
+                this.sockets[id].send(JSON.stringify({
+                    type: CommEnum.SEND_INTERRUPTS,
+                    interrupts: this.players[id].getInterrupts()
+                }))
+                console.log(`Waiting on ${this.players[id].getName()} to resolve interrupts...`)
+                increment = false
+            }
+        }
+
+        if (!increment) {
+            this.updateAllStates()
+            return false
+        }
+
         let cardArgs: CardArgs = {
             owner: this.getActive(),
             opps: Object.values(this.players).filter(x => x !== this.getActive()),
@@ -627,6 +651,35 @@ export default class GameServer {
                                 message: "You haven't unlocked the upgrade shop."
                             }))
                         }
+                        break;
+                    case CommEnum.RESOLVE_INTERRUPT:
+                        let playerInterrupts: TurnInterrupt[] = server.players[id].getInterrupts()
+                        let targets: (string|number)[] = result.interrupts
+                        if (targets.length !== playerInterrupts.length) {
+                            ws.send(JSON.stringify({
+                               type: CommEnum.ERROR,
+                                 message: "You can't resolve these interrupts - invalid number of interrupts."
+                            }))
+                        } else {
+                            let cardsToDiscard: Card[] = []
+                            //resolve the interrupts
+                            for (let i = 0; i < targets.length; i++) {
+                                // let valid = true;
+                                switch (playerInterrupts[i]) {
+                                    case TurnInterrupt.DISCARD_FROM_HAND:
+                                        if (server.players[id].cih().length > 0) {
+                                            cardsToDiscard.push(server.players[id].cih()[targets[i] as number])
+                                        }
+                                        break;
+                                }
+                            }
+                            cardsToDiscard.forEach(card => {
+                                server.players[id].discard(card, server.deck)
+                            })
+                            //clear interrupts
+                            server.players[id].clearInterrupts()
+                        }
+                        server.incrementPhase()
                         break;
                     case CommEnum.BUY_UPGRADE:
                         let upgradeIndex: number = result.upgrade

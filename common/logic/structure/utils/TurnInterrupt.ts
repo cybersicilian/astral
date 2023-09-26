@@ -1,3 +1,3 @@
 export enum TurnInterrupt {
-    DISCARD_FROM_HAND = "dfh"
+    DISCARD_FROM_HAND
 }

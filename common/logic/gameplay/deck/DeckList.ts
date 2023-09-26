@@ -3,7 +3,7 @@ import AbilityIncreasePower from "../../abilities/AbilityIncreasePower";
 import {Pointer, Choices, Rarity} from "../../structure/utils/CardEnums";
 import AbilityDrawCard from "../../abilities/AbilityDrawCard";
 import AbilitySymDraw from "../../abilities/AbilitySymDraw";
-import AbilityDiscardOppCard from "../../abilities/AbilityDiscardOppCard";
+import AbilityDiscardOppCardRandom from "../../abilities/AbilityDiscardOppCardRandom";
 import AbilityDiscardSelfCard from "../../abilities/AbilityDiscardSelfCard";
 import AbilityDiscardHandDrawCards from "../../abilities/AbilityDiscardHandDrawCards";
 import BaseAbility from "../../abilities/core/BaseAbility";
@@ -31,6 +31,7 @@ import Upgrade from "../player/systems/Upgrade";
 import AbilityAddTurnsOpp from "../../abilities/AbilityAddTurnsOpp";
 import AbilityAntivaxxer from "../../abilities/AbilityAntivaxxer";
 import {Zone} from "../cards/Zone";
+import AbilityDiscardOppCard from "../../abilities/AbilityDiscardOppCard";
 
 const DeckList: { [key: string]: Card[] } = {
     radioactivity_deck: [
@@ -711,7 +712,7 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.COMMON),
         new Card(`Corporate Sabotage`, [
             new CostAbility("tadbucks", 20),
-            new AbilityDiscardOppCard(3)
+            new AbilityDiscardOppCardRandom(3)
         ]).setRarity(Rarity.RARE),
         new Card(`Inflationary Hedging`, [
             new CostAbility("tadbucks", 35),
@@ -944,7 +945,7 @@ const DeckList: { [key: string]: Card[] } = {
             })
         ]).setRarity(Rarity.RARE),
         new Card(`Tactical Cuckage`, [
-            new AbilityDiscardOppCard(2),
+            new AbilityDiscardOppCardRandom(2),
             new AbilityDiscardSelfCard(3),
             new BaseAbility(`Make an opponent skip a turn`, [
                 {pointer: Pointer.OPPONENT_MOST_CARDS, choice: Choices.OPPONENT}
