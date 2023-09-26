@@ -144,7 +144,9 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                     this.props.client.playActiveCard()
                 }
             } else {
-                this.setState({playState: PlayState.NotPlaying})
+                if (this.state.playState != PlayState.NotPlaying) {
+                    this.setState({playState: PlayState.NotPlaying})
+                }
             }
             if (this.props.comp.game.turnPhase == 3) {
                 state = TurnState.Discard

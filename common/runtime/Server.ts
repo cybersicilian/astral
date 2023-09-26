@@ -145,7 +145,6 @@ export default class GameServer {
                     type: CommEnum.SEND_INTERRUPTS,
                     interrupts: this.players[id].getInterrupts()
                 }))
-                console.log(`Waiting on ${this.players[id].getName()} to resolve interrupts...`)
                 increment = false
             }
         }
