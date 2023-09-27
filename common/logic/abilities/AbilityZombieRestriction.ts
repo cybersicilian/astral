@@ -2,7 +2,7 @@ import BaseAbility from "./core/BaseAbility";
 
 export default class AbilityZombieRestriction extends BaseAbility {
     constructor() {
-        super(`Play only if you have 0 or less res_life`, [], (abilityArgs) => {
+        super(`Play only if you have 0 or less life`, [], (abilityArgs) => {
         })
 
         this.setCanPlay((abilityArgs) => {

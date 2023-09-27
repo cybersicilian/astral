@@ -102,6 +102,7 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
                 given: 0,
                 text: ""
             }
+            cardArgs.card!.fireEvents("draw", cardArgs)
             this.eventList[cardArgs.card!.getName()].drawn++
             this.eventList[cardArgs.card!.getName()].text = cardArgs.card!.getText()
         })

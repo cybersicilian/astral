@@ -202,7 +202,7 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                         {state == TurnState.NotTurn && (<>
                             {this.props.client.remainingInterrupts() > 0 && (<>
                                 <h4>
-                                    Discard {this.props.client.remainingInterrupts()} more card{this.props.client.remainingInterrupts() > 1 ? "s" : ""}
+                                    Select {this.props.client.remainingInterrupts()} more card{this.props.client.remainingInterrupts() > 1 ? "s" : ""} for this ability
                                 </h4>
                             </>)}
                         </>)}

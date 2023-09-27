@@ -1,6 +1,5 @@
 import Player from "../logic/gameplay/player/Player";
 import Deck from "../logic/gameplay/deck/Deck";
-import DeckList from "../logic/gameplay/deck/DeckList";
 import {CommEnum} from "../logic/structure/utils/CommEnum";
 import {Choices} from "../logic/structure/utils/CardEnums";
 import Upgrade from "../logic/gameplay/player/systems/Upgrade";
@@ -9,7 +8,7 @@ import {ChoiceType} from "../logic/gameplay/cards/choices/ChoiceType";
 
 
 // import {ServerWebSocket, Server, serve} from "bun";
-import { WebSocketServer } from "ws";
+import {WebSocketServer} from "ws";
 import BotType from "../logic/gameplay/player/bots/BehaviorProfile";
 import {adjustAIWeights} from "./dummies/ai_heuristics";
 import {TurnInterrupt} from "../logic/structure/utils/TurnInterrupt";
@@ -661,6 +660,7 @@ export default class GameServer {
                             }))
                         } else {
                             let cardsToDiscard: Card[] = []
+                            let cardsToGiveToActive: Card[] = []
                             //resolve the interrupts
                             for (let i = 0; i < targets.length; i++) {
                                 // let valid = true;
@@ -670,10 +670,18 @@ export default class GameServer {
                                             cardsToDiscard.push(server.players[id].cih()[targets[i] as number])
                                         }
                                         break;
+                                    case TurnInterrupt.GIVE_TO_CONTROLLER:
+                                        if (server.players[id].cih().length > 0 && server.players[id].cih()[targets[i] as number]) {
+                                            cardsToGiveToActive.push(server.players[id].cih()[targets[i] as number])
+                                        }
+                                        break;
                                 }
                             }
                             cardsToDiscard.forEach(card => {
                                 server.players[id].discard(card, server.deck)
+                            })
+                            cardsToGiveToActive.forEach(card => {
+                                server.players[id].give(card, server.getActive())
                             })
                             //clear interrupts
                             server.players[id].clearInterrupts()
