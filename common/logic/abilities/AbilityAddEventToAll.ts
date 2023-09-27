@@ -1,7 +1,5 @@
 import BaseAbility from "./core/BaseAbility";
 import {CardArgs} from "../gameplay/cards/CardArgs";
-import {Pointer, Choices} from "../structure/utils/CardEnums";
-import Player from "../gameplay/player/Player";
 import {VosEvent} from "../structure/utils/Generics";
 
 export default class AbilityAddEventToAll extends BaseAbility {

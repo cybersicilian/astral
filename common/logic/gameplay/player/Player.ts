@@ -524,6 +524,14 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
         }
     }
 
+    giveChoose(cardArgs: CardArgs) {
+        if (this.isBot()) {
+            this.give(this.weightedGive(cardArgs), cardArgs.opps[0])
+        } else {
+            this.resolveBeforeTurn.push(TurnInterrupt.GIVE_TO_CONTROLLER)
+        }
+    }
+
     discardChoose(cardArgs: CardArgs) {
         //TODO: allow player choice
         if (this.isBot()) {
