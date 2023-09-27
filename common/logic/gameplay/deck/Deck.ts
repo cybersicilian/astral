@@ -1,6 +1,7 @@
 import Card from "../cards/Card";
 import {Rarity} from "../../structure/utils/CardEnums";
 import {Zone} from "../cards/Zone";
+import DeckList from "./DeckList";
 
 export default class Deck extends Array<Card> {
     discardPile: Card[] = [];
@@ -53,7 +54,8 @@ export default class Deck extends Array<Card> {
         return cards
     }
 
-    static fromCardList(size: number, cards: Card[]) {
+    static fromCardList(size: number, deckName: string) {
+        let cards = DeckList[deckName]
         //weight by rarity
         //each rarity should be 75% as common as the previous rarity
         //each card should appear at least once
@@ -77,7 +79,7 @@ export default class Deck extends Array<Card> {
 
         let deck = new Deck();
         for (let card of cards) {
-            deck.addCard(card.clone(), rarityWeights[card.getRarity()])
+            deck.addCard(card.clone().setProp("deck", deck), rarityWeights[card.getRarity()])
         }
         return deck;
     }

@@ -10,7 +10,7 @@ export function adjustAIWeights(num_sims: number = 100, console_output: boolean 
     let iter = 0;
     let sims = 100;
     for (let s = sims; s > 0; s--) {
-        let deck = Deck.fromCardList(300, DeckList["basic"])
+        let deck = Deck.fromCardList(300, "basic")
         let bots = [];
         for (let i = 0; i < 3 + sims % 3; i++) {
             bots.push(new Player(7, deck).setBot())

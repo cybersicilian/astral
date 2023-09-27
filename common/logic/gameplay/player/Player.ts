@@ -89,7 +89,7 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
             locked: false
         }, (cardArgs) => {
             cardArgs.owner.draw(cardArgs.deck!, 1)
-            cardArgs.deck.addCards(Deck.fromCardList(1, DeckList["poop_deck"]))
+            cardArgs.deck.addCards(Deck.fromCardList(1, "poop_deck"))
         }, true, 1.5))
 
 
@@ -146,7 +146,7 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
             if (this.getProp("res_life") <= 0) {
                 if (!cardArgs.deck) return
                 if (!cardArgs.deck.props["added_zombie_deck"]) {
-                    cardArgs.deck.addCards(Deck.fromCardList(45, DeckList["zombie_deck"]))
+                    cardArgs.deck.addCards(Deck.fromCardList(45, "zombie_deck"))
                     cardArgs.deck.shuffle()
                     cardArgs.deck.props["added_zombie_deck"] = true
                 }

@@ -52,7 +52,7 @@ export default class GameServer {
     private booted: boolean = false
 
     constructor() {
-        this.deck = Deck.fromCardList(60, DeckList.basic)
+        this.deck = Deck.fromCardList(60, "basic")
         this.deck.shuffle()
     }
 
@@ -61,7 +61,7 @@ export default class GameServer {
         if (this.serverObj) {
             this.serverObj.close()
         }
-        this.deck = Deck.fromCardList(60, DeckList.basic)
+        this.deck = Deck.fromCardList(60, "basic")
         this.deck.shuffle()
         this.sockets = {}
         this.players = {}

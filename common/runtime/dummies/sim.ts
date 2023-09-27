@@ -3,7 +3,7 @@ import Player from "../../logic/gameplay/player/Player";
 import DeckList from "../../logic/gameplay/deck/DeckList";
 
 function initDeck() {
-    let deck = Deck.fromCardList(60, DeckList.basic)
+    let deck = Deck.fromCardList(60, "basic")
 
     return {
         deck: deck
