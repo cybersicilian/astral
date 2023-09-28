@@ -7,7 +7,7 @@ import {CardView} from "./CardView";
 import PlayerCard from "./PlayerCard";
 import {Choices} from "vos-common/logic/structure/utils/CardEnums";
 import LogEntry from "./LogEntry";
-import UpgradeShop from "./UpgradeShop";
+import UpgradeTab from "./systems/upgrades/UpgradeTab";
 import {TurnInterrupt} from "vos-common/logic/structure/utils/TurnInterrupt";
 
 
@@ -292,7 +292,10 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                             <Tabs
                                 id="game-area"
                                 activeKey={this.state.playAreaTab}
-                                onSelect={(k) => this.setState({playAreaTab: k})}
+                                onSelect={(k) => {
+                                    this.setState({playAreaTab: k})
+                                    this.props.client.updateUpgrade
+                                }}
                                 className="mb-3 playArea-tabs"
                                 fill>
                                 <Tab eventKey="discard" title="Discard">
@@ -322,7 +325,7 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                         switch (ui) {
                                             case "upgrade":
                                                 return (<Tab eventKey={"upgrades"} title={"Upgrade Shop"}>
-                                                    <UpgradeShop
+                                                    <UpgradeTab
                                                         canBuy={(state == TurnState.Play && this.state.playState == PlayState.SelectingCard)}
                                                         client={this.props.client}/>
                                                 </Tab>)
@@ -361,6 +364,7 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                             this.props.comp.cards.map((card: CardState, index: number) => {
                                 return (
                                     <CardView
+                                        textOnly={false}
                                         chooseable={(FLAG_CAN_PICK_CARD_IN_HAND &&
                                             ((!(this.state.playState == PlayState.SelectingChoices && index == this.state.selectedCardForPlaying) && (card.playable || !(this.state.playState == PlayState.SelectingCard && state == TurnState.Play))))) ||
                                             ((state == TurnState.NotTurn && this.props.comp.player.interrupts.length > 0 && !this.props.client.choseInterrupt(index)))}

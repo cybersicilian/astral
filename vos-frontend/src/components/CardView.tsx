@@ -4,7 +4,8 @@ import {Button} from "react-bootstrap";
 
 type CardViewProps = {
     card: CardState
-    chooseable: boolean
+    chooseable: boolean,
+    textOnly?: boolean
     onChoose: (card: CardState) => void
 }
 
@@ -23,20 +24,29 @@ export class CardView extends React.Component<CardViewProps, {}> {
                     <h5 className="card-title">{this.props.card.name}</h5>
                     {/*<h6 className="card-subtitle mb-2 text-muted">{this.props.power}</h6>*/}
                     {...this.props.card.text.split("\n").map((line) => {
-                        return (<><p className="card-text">{line}</p><hr/></>)
+                        return (<><p className="card-text">{line}</p>
+                            <hr/>
+                        </>)
                     })}
                     {this.props.card.props && (<p className="card-text">{JSON.stringify(this.props.card.props)}</p>)}
                 </div>
-                {this.props.chooseable ? (
-                    //    card footer that floats above the content
-                    <div className="card-footer">
-                        <Button onClick={() => {this.props.onChoose(this.props.card)}}>Choose</Button>
-                    </div>
-                ) : (
-                    <div className={"card-footer"}>
-                        <Button disabled={true}>Choose</Button>
-                    </div>
-                )}
+                {!(this.props.textOnly ?? true) && (
+                    <>
+                        {
+                            this.props.chooseable ? (
+                                //    card footer that floats above the content
+                                <div className="card-footer">
+                                    <Button onClick={() => {
+                                        this.props.onChoose(this.props.card)
+                                    }}>Choose</Button>
+                                </div>
+                            ) : (
+                                <div className={"card-footer"}>
+                                    <Button disabled={true}>Choose</Button>
+                                </div>
+                            )
+                        }
+                    </>)}
             </div>
         )
     }

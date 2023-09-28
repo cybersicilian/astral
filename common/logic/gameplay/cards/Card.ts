@@ -206,7 +206,7 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
         }
         return this.getName() + powStr;
     }
-
+    
     getName() {
         return this.name
     }
@@ -216,6 +216,23 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
         return this;
     }
 
+    toState(a: CardArgs) {
+        return {
+            name: this.getDisplayName(),
+            text: this.getFormulatedText(a),
+            rarity: this.getRarity(),
+            power: this.pow(),
+            formula: this.getFormulas(),
+            props: this.getProps(),
+            playable: this.canBePlayed({
+                owner: this,
+                opps: opps,
+                deck: deck,
+                card: x
+            }),
+        }
+    }
+    
     toCardState(): CardState {
         return {
             name: this.name,

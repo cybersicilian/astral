@@ -1,7 +1,6 @@
 import Card from "../cards/Card";
 import Deck from "../deck/Deck";
 import {CardArgs} from "../cards/CardArgs";
-import DeckList from "../deck/DeckList";
 import {Rarity} from "../../structure/utils/CardEnums";
 import Upgrade from "./systems/Upgrade";
 import {IIdentifiable} from "../../structure/interfaces/IIdentifiable";
@@ -79,6 +78,7 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
         this.draw(deck, cards)
 
         this.setProp("meta_upgrade", [])
+        this.setProp("meta_religion", undefined)
         this.addUpgrade(new Upgrade({
             name: "Take a Crap",
             description: "Take a bathroom break to draw a card.",
@@ -231,24 +231,11 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
     }
 
     getCards(opps: Player[], deck: Deck): CardState[] {
-        return this.cards.map(x => ({
-            name: x.getDisplayName(),
-            text: x.getFormulatedText({
-                owner: this,
-                opps: opps,
-                deck: deck,
-                card: x
-            }),
-            rarity: x.getRarity(),
-            power: x.pow(),
-            formula: x.getFormulas(),
-            props: x.getProps(),
-            playable: x.canBePlayed({
-                owner: this,
-                opps: opps,
-                deck: deck,
-                card: x
-            }),
+        return this.cards.map(x => x.toState({
+            owner: this,
+            opps: opps,
+            deck: deck,
+            card: x
         }))
     }
 

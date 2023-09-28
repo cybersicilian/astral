@@ -1,7 +1,7 @@
 import {UpgradeData} from "vos-common/logic/gameplay/player/systems/Upgrade";
 import {Button} from "react-bootstrap";
 
-export default function USItem(props: { frozen: boolean, buy: () => void, upgrade: UpgradeData }) {
+export default function UpgradeItem(props: { frozen: boolean, buy: () => void, upgrade: UpgradeData }) {
     return (
         <tr>
             <td>{props.upgrade.name}<br/><small><i>{props.upgrade.description}</i></small></td>

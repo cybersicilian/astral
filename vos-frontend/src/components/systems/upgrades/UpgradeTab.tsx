@@ -1,14 +1,14 @@
 import React from "react";
 import Client from "vos-common/runtime/Client";
 import {Button} from "react-bootstrap";
-import USItem from "./USItem";
+import UpgradeItem from "./UpgradeItem";
 
 type UpgradeShopProps = {
     client: Client,
     canBuy: boolean
 }
 
-export default class UpgradeShop extends React.Component<UpgradeShopProps, {}> {
+export default class UpgradeTab extends React.Component<UpgradeShopProps, {}> {
     constructor(props: UpgradeShopProps) {
         super(props)
     }
@@ -23,7 +23,7 @@ export default class UpgradeShop extends React.Component<UpgradeShopProps, {}> {
                     </thead>
                     <tbody>
                     {this.props.client.getUpgrades().map((upgrade, index) => {
-                        return (<USItem buy={() => {
+                        return (<UpgradeItem buy={() => {
                             this.props.client.buyUpgrade(index)
                         }} frozen={!this.props.canBuy} upgrade={upgrade}/>)
                     })}

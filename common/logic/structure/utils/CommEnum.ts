@@ -21,6 +21,10 @@ export enum CommEnum {
     //marketplace
     TRANSFER_MARKETPLACE,
 
+    //faith mechanics
+    TRANSFER_RELIGION,
+    ADD_RELIGIOUS_TENANT,
+
     //turn phases
     DRAW_CARD,
     PLAY_CARD,
