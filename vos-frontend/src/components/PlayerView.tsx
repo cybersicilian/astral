@@ -9,6 +9,7 @@ import {Choices} from "vos-common/logic/structure/utils/CardEnums";
 import LogEntry from "./LogEntry";
 import UpgradeTab from "./systems/upgrades/UpgradeTab";
 import {TurnInterrupt} from "vos-common/logic/structure/utils/TurnInterrupt";
+import ReligionTab from "./systems/religion/ReligionTab";
 
 
 type PlayerViewProps = {
@@ -329,10 +330,10 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                                         canBuy={(state == TurnState.Play && this.state.playState == PlayState.SelectingCard)}
                                                         client={this.props.client}/>
                                                 </Tab>)
-                                            case "marketplace":
+                                            case "religion":
                                                 return (
-                                                    <Tab eventKey={"marketplace"} title={"Marketplace"}>
-
+                                                    <Tab eventKey={"religion"} title={"Religion"}>
+                                                        <ReligionTab client={this.props.client}/>
                                                     </Tab>
                                                 )
                                         }

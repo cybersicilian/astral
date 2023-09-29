@@ -11,6 +11,7 @@ import {IPlayable} from "../../structure/interfaces/IPlayable";
 import {Resolver, ResolverCallback} from "../../structure/utils/Resolver";
 import {AIProfile, AIWeights} from "../ai/AIProfile";
 import {Zone} from "./Zone";
+import SlottedAbility from "../../abilities/core/SlottedAbility";
 
 export default class Card implements IIdentifiable, IProppable, ITriggerable, IPlayable {
     private name: string;
@@ -217,29 +218,35 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
     }
 
     toState(a: CardArgs) {
+        let props = {...this.getProps()}
+        //filter deck from props
+        delete props.deck
         return {
             name: this.getDisplayName(),
             text: this.getFormulatedText(a),
             rarity: this.getRarity(),
             power: this.pow(),
             formula: this.getFormulas(),
-            props: this.getProps(),
+            props: props,
             playable: this.canBePlayed({
-                owner: this,
-                opps: opps,
-                deck: deck,
-                card: x
+                owner: a.owner,
+                opps: a.opps,
+                deck: a.deck,
+                card: this
             }),
         }
     }
     
     toCardState(): CardState {
+        let props = {...this.getProps()}
+        //filter deck from props
+        delete props.deck
         return {
             name: this.name,
             power: this.power,
             rarity: this.rarity,
             text: this.getText(),
-            props: this.props
+            props: props
         }
     }
 
@@ -280,6 +287,14 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
         }
     }
 
+    onSlottable(args: CardArgs) {
+        for (let ability of this.orderAbilities()) {
+            if (ability.getProp("slotted_ability") && ability instanceof SlottedAbility) {
+                (ability as SlottedAbility).onSlot(args)
+            }
+        }
+    }
+
     orderAbilities() {
         return this.abilities.sort((a, b) => {
             //sort playerrestriction and playerrestrictionabilitynegs after cost abilities
@@ -303,6 +318,10 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
                 return -1
             } else if (!a.hasRestriction() && b.hasRestriction()) {
                 return 1
+            } else if (a.getProp("slotted_ability") && !b.getProp("slotted_ability")) {
+                return 1
+            } else if (!a.getProp("slotted_ability") && b.getProp("slotted_ability")) {
+                return -1
             }
             return 0
         })

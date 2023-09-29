@@ -1,5 +1,6 @@
 import Card from "../gameplay/cards/Card";
 import {CardState} from "../gameplay/player/Player";
+import {CardArgs} from "../gameplay/cards/CardArgs";
 
 export type SlottableTier = {
     name?: string
@@ -10,8 +11,11 @@ export type SlottableTier = {
 
 export type CardSlottableState = {
     structure: SlottableTier[],
-    slots: CardState[]
+    slots: CardState[],
+    validity: SlottableValidityMap
 }
+
+export type SlottableValidityMap = boolean[]
 
 export abstract class CardSlottable {
 
@@ -22,10 +26,27 @@ export abstract class CardSlottable {
     abstract isValid(card: Card): boolean
     abstract getValidTiers(card: Card): number[]
 
-    abstract addCard(card: Card, tier: number = 0): boolean
+    addCard(args: CardArgs, tier: number = 0): boolean {
+        if (this.getValidTiers(args.card).includes(tier)) {
+            this.slots[tier] = args.card;
+            args.card.onSlottables(args)
+            return true;
+        } else if (this.isValid(args.card)) {
+            for (let i of this.getValidTiers(args.card)) {
+                if (this.slots[i] === undefined) {
+                    this.slots[i] = args.card;
+                    args.card.onSlottables(args)
+                    return true;
+                }
+            }
+        }
+        //remove the card from the owner's hand
+        args.owner.cih().splice(args.owner.cih().indexOf(args.card), 1)
+        return false;
+    }
 
     abstract getCards(): Card[]
     abstract getCardsOfTier(tier: number): Card[]
 
-    abstract toState(): CardSlottableState
+    abstract toState(args: CardArgs): CardSlottableState
 }

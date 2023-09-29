@@ -1,9 +1,10 @@
 import {CardSlottable, CardSlottableState, SlottableTier} from "../../../structure/CardSlottable";
-import {IIdentifiable} from "../../../structure/interfaces/IIdentifiable";
-import {IProppable, Properties} from "../../../structure/interfaces/IProppable";
+import {IIdentifiable, IIdentifiableState} from "../../../structure/interfaces/IIdentifiable";
+import {IProppable, IProppableState, Properties} from "../../../structure/interfaces/IProppable";
 import Card from "../../cards/Card";
 import {CardArgs} from "../../cards/CardArgs";
 import {ResolverCallback} from "../../../structure/utils/Resolver";
+import {Systems} from "../../../structure/utils/Systems";
 
 export default class Religion extends CardSlottable implements IIdentifiable, IProppable {
     private readonly structure: SlottableTier[];
@@ -29,18 +30,16 @@ export default class Religion extends CardSlottable implements IIdentifiable, IP
                 slots: 1
             }
         ]
+
+        this.slots.fill(undefined, 0, this.structure.length)
     }
 
     getValidTiers(card: Card): number[] {
-        return [];
+        return card.getProp(Systems.RELIGION) ?? []
     }
 
-    addCard(card: Card, tier: number = 0): boolean {
-        if (this.getValidTiers(card).includes(tier)) {
-            this.slots[tier] = card;
-            return true;
-        }
-        return false;
+    addCard(args: CardArgs, tier: number = 0): boolean {
+        return super.addCard(args, tier)
     }
 
     getCards(): Card[] {
@@ -69,7 +68,9 @@ export default class Religion extends CardSlottable implements IIdentifiable, IP
     }
 
     isValid(card: Card): boolean {
-        return false;
+        return (card.getProp(Systems.RELIGION) !== undefined) && (card.getProp(Systems.RELIGION).filter((tier: number) => {
+            return this.slots[tier] === undefined
+        })).length > 0
     }
 
     setProp(prop: string, value: any, args?: CardArgs) {
@@ -77,11 +78,16 @@ export default class Religion extends CardSlottable implements IIdentifiable, IP
         return this
     }
 
-    toState(): CardSlottableState {
+    toState(args: CardArgs): CardSlottableState&IIdentifiableState&IProppableState {
         return {
+            name: this.name,
+            props: this.props,
             structure: this.structure,
             slots: this.slots.map((card) => {
-                return card.toState()
+                return card.toState(args)
+            }),
+            validity: args.owner.cih().map((card) => {
+                return this.isValid(card)
             })
         }
     }

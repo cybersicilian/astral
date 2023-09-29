@@ -13,6 +13,7 @@ import BotType from "../logic/gameplay/player/bots/BehaviorProfile";
 import {adjustAIWeights} from "./dummies/ai_heuristics";
 import {TurnInterrupt} from "../logic/structure/utils/TurnInterrupt";
 import Card from "../logic/gameplay/cards/Card";
+import Religion from "../logic/gameplay/player/systems/Religion";
 
 export type ServerConfig = {
     startingHand: number, //4
@@ -263,11 +264,25 @@ export default class GameServer {
         this.incrementTurn()
     }
 
+    updateReligion(id: string) {
+        if (this.players[id].religion()) {
+            let ws = this.sockets[id]
+            ws.send(JSON.stringify({
+                type: CommEnum.TRANSFER_RELIGION,
+                religion: this.getActive().religion().toState({
+                    owner: this.players[id],
+                    opps: [],
+                    deck: this.deck
+                })
+            }))
+        }
+    }
+
     updateUpgradeShop(id: string) {
         let ws = this.sockets[id]
         ws.send(JSON.stringify({
             type: CommEnum.TRANSFER_UPGRADE_SHOP,
-            shop: this.getActive().getProp(`meta_upgrade`)
+            shop: this.players[id].getProp(`meta_upgrade`)
                 .map((upgrade: Upgrade) => {
                     return upgrade.getData({
                         owner: this.players[id],
@@ -648,6 +663,38 @@ export default class GameServer {
                                 type: CommEnum.ERROR,
                                 message: "You haven't unlocked the upgrade shop."
                             }))
+                        }
+                        break;
+                    case CommEnum.TRANSFER_RELIGION:
+                        if (server.getActive().getUIs().religion) {
+                            server.updateReligion(id)
+                        } else {
+                            ws.send(JSON.stringify({
+                                type: CommEnum.ERROR,
+                                message: "You haven't unlocked religion yet."
+                            }))
+                        }
+                        break;
+                    case CommEnum.ADD_RELIGIOUS_TENANT:
+                        let tenantToAdd = result.idInHand
+                        if (server.players[id].cih().length < tenantToAdd + 1 || !server.players[id].cih()[tenantToAdd]) {
+                            ws.send(JSON.stringify({
+                                type: CommEnum.ERROR,
+                                message: "You can't add this tenant - invalid tenant."
+                            }))
+                        } else if (!server.players[id].getUIs().religion) {
+                            ws.send(JSON.stringify({
+                                type: CommEnum.ERROR,
+                                message: "You haven't unlocked religion yet."
+                            }))
+                        } else if (!server.players[id].religion()) {
+                            ws.send(JSON.stringify({
+                                type: CommEnum.ERROR,
+                                message: "You don't have a religion."
+                            }))
+                        } else if (!server.players[id].religion()!.isValid(server.players[id].cih()[tenantToAdd])) {
+                            //remove the card from the player and add it to the religion
+                            server.players[id].religion()!.addCard(server.players[id].cih()[tenantToAdd])
                         }
                         break;
                     case CommEnum.RESOLVE_INTERRUPT:

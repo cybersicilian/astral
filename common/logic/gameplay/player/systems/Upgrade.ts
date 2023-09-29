@@ -7,7 +7,8 @@ export type UpgradeData = {
        amt: number,
        resource: string
     }[],
-    locked?: boolean
+    locked?: boolean,
+    level?: number
 }
 
 export default class Upgrade {
@@ -15,17 +16,19 @@ export default class Upgrade {
     private readonly effect: (cardArgs: CardArgs, upgrade: Upgrade) => void
     private readonly infinite: boolean = false
     private readonly scale: number = 1.1
-    private level = 0;
 
     constructor(data: UpgradeData, effect: (cardArgs: CardArgs, upgrade: Upgrade) => void, infinite= false, scale = 1.1) {
         this.data = JSON.parse(JSON.stringify(data))
+        if (!this.data.level) {
+            this.data.level = 0
+        }
         this.effect = effect
         this.infinite = infinite
         this.scale = scale
     }
 
     lvl() {
-        return this.level
+        return this.data.level
     }
 
     getCost() {
@@ -37,12 +40,13 @@ export default class Upgrade {
             name: this.getName(),
             description: this.getDescription(),
             cost: this.getCost(),
-            locked: this.data.locked || !this.canPayCost(cardArgs)
+            locked: this.data.locked || !this.canPayCost(cardArgs),
+            level: this.data.level
         }
     }
 
     getName() {
-        return `${this.data.name}${this.infinite && this.level > 0 ? ` Lvl. ${this.level}` : ``}`
+        return `${this.data.name}${this.infinite && this.data.level > 0 ? ` Lvl. ${this.data.level}` : ``}`
     }
 
     getDescription() {

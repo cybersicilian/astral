@@ -24,6 +24,7 @@ export enum CommEnum {
     //faith mechanics
     TRANSFER_RELIGION,
     ADD_RELIGIOUS_TENANT,
+    CREATE_RELIGION,
 
     //turn phases
     DRAW_CARD,

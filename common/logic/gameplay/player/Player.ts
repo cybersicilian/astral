@@ -12,6 +12,8 @@ import Bot from "./bots/Bot";
 import BotType from "./bots/BehaviorProfile";
 import {Zone} from "../cards/Zone";
 import {TurnInterrupt} from "../../structure/utils/TurnInterrupt";
+import Religion from "./systems/Religion";
+import SlottedAbility from "../../abilities/core/SlottedAbility";
 
 //these shouldn't be here, but I'm too lazy to move them
 export type CardState = {
@@ -61,6 +63,8 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
     private botProfile?: Bot = undefined
 
     private resolveBeforeTurn: TurnInterrupt[] = []
+
+    private slottedAbilities: SlottedAbility[] = []
 
 
     private eventList: {
@@ -155,6 +159,16 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
         })
     }
 
+    addSlottedAbility(ability: SlottedAbility) {
+        this.slottedAbilities.push(ability)
+        return this
+    }
+
+    removeSlottedAbility(ability: SlottedAbility) {
+        this.slottedAbilities.splice(this.slottedAbilities.indexOf(ability), 1)
+        return this
+    }
+
     addResource(key: string, amt: number) {
         if (key.startsWith("res_")) key = key.substring(4)
         if (!this.getProp(`res_${key}`)) this.setProp(`res_${key}`, 0)
@@ -163,6 +177,10 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
 
     upgrades() {
         return this.props["meta_upgrade"] as Upgrade[] || []
+    }
+
+    religion() {
+        return this.props["meta_religion"] as Religion || undefined
     }
 
     addUpgrade(u: Upgrade) {
@@ -194,10 +212,11 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
 
     getUIs() {
         return {
-            marketplace: this.props["marketplace"] || false,
-            gene_bank: this.props["gene_bank"] || false,
-            casino: this.props["casino"] || false,
+            // marketplace: this.props["marketplace"] || false,
+            // gene_bank: this.props["gene_bank"] || false,
+            // casino: this.props["casino"] || false,
             upgrade: true, //this.props["upgrade"] || false,
+            religion: this.props["religion"] || false,
         }
     }
 
@@ -314,6 +333,15 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
                 func(cardArgs)
             }
             delete this.events[`temp_${name}`]
+        }
+        //iterate through all the slotted abilities and fire their events
+        for (let ability of this.slottedAbilities) {
+            let events: EventCluster = ability.playerEvents()
+            if (events[name]) {
+                for (let func of events[name]) {
+                    func(cardArgs)
+                }
+            }
         }
     }
 
