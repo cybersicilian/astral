@@ -9,7 +9,7 @@ export default class AbilityAddTurns extends BaseAbility {
         super(`Add {formula} turns..`, [], (abilityArgs, madeChoices) => {
             abilityArgs.owner.addTurns(Math.max(0, qty - abilityArgs.card?.pow()))
         })
-        this.setFormula(`${qty} - pow`)
+        this.setFormula(`${qty} - {pow}`)
         this.sai({
             winProgress: (c: CardArgs) => Math.max(qty - c.card.pow(), 0),
             affectsSelf: (c: CardArgs) => Math.max(qty - c.card.pow(), 0)

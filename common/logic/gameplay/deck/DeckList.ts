@@ -1,41 +1,25 @@
 import Card from "../cards/Card";
 import AbilityIncreasePower from "../../abilities/AbilityIncreasePower";
 import {Pointer, Choices, Rarity} from "../../structure/utils/CardEnums";
-import AbilityDrawCard from "../../abilities/AbilityDrawCard";
-import AbilitySymDraw from "../../abilities/AbilitySymDraw";
-import AbilityDiscardOppCardRandom from "../../abilities/AbilityDiscardOppCardRandom";
 import AbilityDiscardSelfCard from "../../abilities/AbilityDiscardSelfCard";
-import AbilityDiscardHandDrawCards from "../../abilities/AbilityDiscardHandDrawCards";
 import BaseAbility from "../../abilities/core/BaseAbility";
 import Player from "../player/Player";
 import AbilityRemoveOtherCopiesFromGame from "../../abilities/AbilityRemoveOtherCopiesFromGame";
 import AbilityExplodeCard from "../../abilities/AbilityExplodeCard";
 import AbilityAddResource from "../../abilities/AbilityAddResource";
-import CostAbility from "../../abilities/core/CostAbility";
 import AbilityAddDeck from "../../abilities/AbilityAddDeck";
 import AbilityZombieRestriction from "../../abilities/AbilityZombieRestriction";
-import OnDrawAbility from "../../abilities/core/OnDrawAbility";
-import AbilityAddEventToSelf from "../../abilities/AbilityAddEventToSelf";
-import AbilityWin from "../../abilities/AbilityWin";
-import AbilitySetPropSelf from "../../abilities/AbilitySetPropSelf";
-import AbilityRecoverCards from "../../abilities/AbilityRecoverCards";
-import AbilityShuffleDiscardIntoDeck from "../../abilities/AbilityShuffleDiscardIntoDeck";
-import PlayerRestrictionAbility from "../../abilities/core/PlayerRestrictionAbility";
-import PlayerRestrictionAbilityNeg from "../../abilities/core/PlayerRestrictionAbilityNeg";
-import AbilityAddEventToAll from "../../abilities/AbilityAddEventToAll";
-import AbilitySetPropAll from "../../abilities/AbilitySetPropAll";
-import PlayerPredicateRestrictionAbility from "../../abilities/core/PlayerPredicateRestrictionAbility";
 import TextAbility from "../../abilities/core/TextAbility";
-import AbilityUnlockUpgrade from "../../abilities/AbilityUnlockUpgrade";
-import Upgrade from "../player/systems/Upgrade";
-import AbilityAddTurnsOpp from "../../abilities/AbilityAddTurnsOpp";
-import AbilityAntivaxxer from "../../abilities/AbilityAntivaxxer";
 import {Zone} from "../cards/Zone";
-import AbilityDiscardOppCard from "../../abilities/AbilityDiscardOppCard";
 import {CardArgs} from "../cards/CardArgs";
 import SlottedAbility from "../../abilities/core/SlottedAbility";
-import {Systems} from "../../structure/utils/Systems";
 import AbilityAddTurns from "../../abilities/AbilityAddTurns";
+import {PropEnums} from "../../structure/utils/PropEnums";
+import AbilityDrawCard from "../../abilities/AbilityDrawCard";
+import AbilityRecoverCards from "../../abilities/AbilityRecoverCards";
+import AbilityDiscardOppCard from "../../abilities/AbilityDiscardOppCard";
+import AbilityRemoveTurns from "../../abilities/AbilityRemoveTurns";
+import AbilitySkipOpp from "../../abilities/AbilitySkipOpp";
 
 const DeckList: { [key: string]: Card[] } = {
     zombie_deck: [
@@ -117,7 +101,7 @@ const DeckList: { [key: string]: Card[] } = {
                     }]
                 }
             })
-        ]).setProp(Systems.RELIGION, [0]).setRarity(Rarity.BASIC),
+        ]).setProp(PropEnums.RELIGION, [0]).setRarity(Rarity.BASIC),
         new Card(`Thoughts and Prayers`, [
             new AbilityAddResource(0, "faith"),
             new AbilityAddTurns(3).setText(`Meditate. Add {formula} turns.`)
@@ -133,6 +117,34 @@ const DeckList: { [key: string]: Card[] } = {
         ]).setRarity(Rarity.BASIC).setProp("crap", true),
     ],
     basic: [
+        new Card(`Consider`, [
+            new AbilityDrawCard(1)
+        ]).setRarity(Rarity.COMMON),
+        new Card(`Recover`, [
+            new AbilityRecoverCards(1)
+        ]).setRarity(Rarity.RARE),
+        new Card(`Tickle`, [
+            new AbilityDiscardOppCard(1)
+        ]).setRarity(Rarity.COMMON),
+        new Card(`Accelerate`, [
+            new AbilityRemoveTurns(2)
+        ]).setRarity(Rarity.UNCOMMON),
+        new Card(`Throat Punch`, [
+            new AbilityDrawCard(1),
+            new AbilityDiscardOppCard(1)
+        ]).setRarity(Rarity.UNCOMMON),
+        new Card(`Skip`, [
+            new AbilitySkipOpp(1)
+        ]).setRarity(Rarity.MYTHIC),
+        new Card(`Innovate`, [
+            new BaseAbility(`Add "Draw {formula} card" to a card in your hand.`, [
+                {choice: Choices.CARD_IN_HAND, pointer: Pointer.CARD_IN_HAND_RANDOM}
+            ], (a, m) => {
+                let card = m[0] as Card
+                card.setName(`Innovative ${card.getName()}`)
+                card.addAbility(new AbilityDrawCard(a.card?.pow() - card.pow()))
+            }).setFormula(`{pow}`),
+        ]).setRarity(Rarity.UNCOMMON),
         new Card(`You Could Make a Religion Outta This`, [
             new AbilityAddDeck("faith_deck"),
             new AbilityAddResource(1, "faith"),

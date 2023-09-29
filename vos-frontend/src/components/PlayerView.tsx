@@ -295,7 +295,6 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                 activeKey={this.state.playAreaTab}
                                 onSelect={(k) => {
                                     this.setState({playAreaTab: k})
-                                    this.props.client.updateUpgrade
                                 }}
                                 className="mb-3 playArea-tabs"
                                 fill>
@@ -366,9 +365,11 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                 return (
                                     <CardView
                                         textOnly={false}
+                                        selectedTab={this.state.playAreaTab}
                                         chooseable={(FLAG_CAN_PICK_CARD_IN_HAND &&
                                             ((!(this.state.playState == PlayState.SelectingChoices && index == this.state.selectedCardForPlaying) && (card.playable || !(this.state.playState == PlayState.SelectingCard && state == TurnState.Play))))) ||
-                                            ((state == TurnState.NotTurn && this.props.comp.player.interrupts.length > 0 && !this.props.client.choseInterrupt(index)))}
+                                            ((state == TurnState.NotTurn && this.props.comp.player.interrupts.length > 0 && !this.props.client.choseInterrupt(index))) ||
+                                            ((state == TurnState.Play && this.state.playState == PlayState.SelectingCard && this.state.playAreaTab == "religion" && this.props.client.cachedReligion().validity[index]))}
                                         onChoose={(card) => {
                                             if (state == TurnState.Give) {
                                                 this.setState({
@@ -376,7 +377,9 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                                     selectedCardForGifting: index
                                                 })
                                             } else if (state == TurnState.Play) {
-                                                if (this.state.playState == PlayState.SelectingCard && card.playable) {
+                                                if (this.state.playState == PlayState.SelectingCard && this.state.playAreaTab == "religion") {
+                                                    this.props.client.addReligiousTenant(index)
+                                                } else if (this.state.playState == PlayState.SelectingCard && card.playable) {
                                                     this.props.client.selectCardToPlay(index)
                                                     this.setState({
                                                         selectedCardForPlaying: index

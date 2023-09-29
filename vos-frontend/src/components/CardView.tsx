@@ -6,7 +6,8 @@ type CardViewProps = {
     card: CardState
     chooseable: boolean,
     textOnly?: boolean
-    onChoose: (card: CardState) => void
+    onChoose: (card: CardState) => void,
+    selectedTab?: string
 }
 
 export class CardView extends React.Component<CardViewProps, {}> {

@@ -14,6 +14,7 @@ import {Zone} from "../cards/Zone";
 import {TurnInterrupt} from "../../structure/utils/TurnInterrupt";
 import Religion from "./systems/Religion";
 import SlottedAbility from "../../abilities/core/SlottedAbility";
+import {PropEnums} from "../../structure/utils/PropEnums";
 
 //these shouldn't be here, but I'm too lazy to move them
 export type CardState = {
@@ -81,8 +82,8 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
         this.name = Math.random().toString(36).substring(7);
         this.draw(deck, cards)
 
-        this.setProp("meta_upgrade", [])
-        this.setProp("meta_religion", undefined)
+        this.setProp(PropEnums.UPGRADE_SHOP, [])
+        this.setProp(PropEnums.RELIGION, new Religion("Da Faith"))
         this.addUpgrade(new Upgrade({
             name: "Take a Crap",
             description: "Take a bathroom break to draw a card.",
@@ -176,16 +177,16 @@ export default class Player implements IIdentifiable, IProppable, IEventable {
     }
 
     upgrades() {
-        return this.props["meta_upgrade"] as Upgrade[] || []
+        return this.props[PropEnums.UPGRADE_SHOP] as Upgrade[] || []
     }
 
     religion() {
-        return this.props["meta_religion"] as Religion || undefined
+        return this.props[PropEnums.RELIGION] as Religion || undefined
     }
 
     addUpgrade(u: Upgrade) {
-        if (!this.props["meta_upgrade"]) this.props["meta_upgrade"] = []
-        this.props["meta_upgrade"].push(u)
+        if (!this.props[PropEnums.UPGRADE_SHOP]) this.props[PropEnums.UPGRADE_SHOP] = []
+        this.props[PropEnums.UPGRADE_SHOP].push(u)
         this.fireEvents("new_upgrade", {owner: this, opps: [], deck: undefined, card: undefined})
     }
 

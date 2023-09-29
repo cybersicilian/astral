@@ -12,14 +12,14 @@ import {AIMeta, AIWeights} from "../../gameplay/ai/AIProfile";
 import Bot from "../../gameplay/player/bots/Bot";
 
 export default class BaseAbility implements IProppable, IEventable, IPlayable {
-    private  text: string;
+    protected text: string;
     private readonly callback: (abilityArgs: CardArgs, madeChoices: (ChoiceType)[]) => void;
     private readonly choices: ResolverCallback<(c: CardArgs) => AbilityChoices[]> = new ResolverCallback([]);
-    private formula: string = `{pow}`
+    protected formula: string = `{pow}`
     canPlay: ResolverCallback<(c: CardArgs) => boolean> = new ResolverCallback(true)
     canGive: ResolverCallback<(p: Player, c: CardArgs) => boolean> = new ResolverCallback(true)
 
-    private props: Properties = {}
+    protected props: Properties = {}
     private events: EventCluster = {}
     private traits: any = {}
 
@@ -52,6 +52,9 @@ export default class BaseAbility implements IProppable, IEventable, IPlayable {
         ability.setCanPlay(this.canPlay.getCallback())
         ability.setCanGive(this.canGive.getCallback())
         ability.sai(this.ai())
+        for (let prop of Object.keys(this.props)) {
+            ability.setProp(prop, this.props[prop])
+        }
         return ability
     }
 
@@ -140,7 +143,11 @@ export default class BaseAbility implements IProppable, IEventable, IPlayable {
     calcFormula(cardArgs: CardArgs) {
         //replace tokens in formula
         let formula = this.textualizeFormula();
-        formula = formula.replace("{pow}", cardArgs.card!.pow().toString())
+        try {
+            formula = formula.replace("{pow}", cardArgs.card!.pow().toString())
+        } catch {
+            formula = formula.replace("{pow}", "1")
+        }
 
         //resolve it to a number (operations are +, -, /, *, and ^) - parenthesis are supported
         return eval(formula)

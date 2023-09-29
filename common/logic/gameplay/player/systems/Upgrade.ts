@@ -51,7 +51,7 @@ export default class Upgrade {
 
     getDescription() {
         let text = this.data.description;
-        text = text.replace(`{level}`, this.level + "")
+        text = text.replace(`{level}`, this.data.level + "")
         //regex match any text in {} and evaluate it as javascript code
         let matches = text.match(/{[^}]*}/g)
         if (matches) {
@@ -95,7 +95,7 @@ export default class Upgrade {
         if (!this.data.locked) {
             this.payCost(cardArgs)
             this.effect(cardArgs, this)
-            this.level++;
+            this.data.level++;
             if (!this.infinite) {
                 this.data.locked = true
             } else {

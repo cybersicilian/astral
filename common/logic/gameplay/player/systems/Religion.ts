@@ -4,12 +4,10 @@ import {IProppable, IProppableState, Properties} from "../../../structure/interf
 import Card from "../../cards/Card";
 import {CardArgs} from "../../cards/CardArgs";
 import {ResolverCallback} from "../../../structure/utils/Resolver";
-import {Systems} from "../../../structure/utils/Systems";
+import {PropEnums} from "../../../structure/utils/PropEnums";
 
 export default class Religion extends CardSlottable implements IIdentifiable, IProppable {
-    private readonly structure: SlottableTier[];
 
-    private slots: Card[] = [];
     private name: string;
     private props: Properties;
 
@@ -35,7 +33,7 @@ export default class Religion extends CardSlottable implements IIdentifiable, IP
     }
 
     getValidTiers(card: Card): number[] {
-        return card.getProp(Systems.RELIGION) ?? []
+        return card.getProp(PropEnums.RELIGION) ?? []
     }
 
     addCard(args: CardArgs, tier: number = 0): boolean {
@@ -68,7 +66,7 @@ export default class Religion extends CardSlottable implements IIdentifiable, IP
     }
 
     isValid(card: Card): boolean {
-        return (card.getProp(Systems.RELIGION) !== undefined) && (card.getProp(Systems.RELIGION).filter((tier: number) => {
+        return (card.getProp(PropEnums.RELIGION) !== undefined) && (card.getProp(PropEnums.RELIGION).filter((tier: number) => {
             return this.slots[tier] === undefined
         })).length > 0
     }

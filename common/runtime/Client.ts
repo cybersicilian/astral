@@ -4,6 +4,7 @@ import {AbilityChoices} from "../logic/gameplay/cards/choices/AbilityChoices";
 import {UpgradeData} from "../logic/gameplay/player/systems/Upgrade";
 import {TurnInterrupt} from "../logic/structure/utils/TurnInterrupt";
 import {CardSlottableState} from "../logic/structure/CardSlottable";
+import {IIdentifiableState} from "../logic/structure/interfaces/IIdentifiable";
 
 export type ActiveChoices = {
     choice: AbilityChoices[],
@@ -49,7 +50,7 @@ export default class Client {
 
     //these are for extra features down the road
     private upgradeShop: UpgradeData[] = []
-    private religion?: CardSlottableState
+    private religion?: CardSlottableState&IIdentifiableState
 
     //interrupt
     private activeInterrupts: TurnInterrupt[] = []
@@ -253,6 +254,10 @@ export default class Client {
         }
     }
 
+    cachedReligion() {
+        return this.religion
+    }
+
     getReligion() {
         if (this.socket) {
             this.socket.send(JSON.stringify({
@@ -260,6 +265,7 @@ export default class Client {
                 id: this.id
             }))
         }
+        // console.log(this.religion)
         return this.religion
     }
 
@@ -268,7 +274,7 @@ export default class Client {
             this.socket.send(JSON.stringify({
                 type: CommEnum.ADD_RELIGIOUS_TENANT,
                 id: this.id,
-                cardId: cardId
+                idInHand: cardId
             }))
         }
     }

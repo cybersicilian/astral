@@ -269,7 +269,7 @@ export default class GameServer {
             let ws = this.sockets[id]
             ws.send(JSON.stringify({
                 type: CommEnum.TRANSFER_RELIGION,
-                religion: this.getActive().religion().toState({
+                religion: this.players[id].religion().toState({
                     owner: this.players[id],
                     opps: [],
                     deck: this.deck
@@ -666,7 +666,7 @@ export default class GameServer {
                         }
                         break;
                     case CommEnum.TRANSFER_RELIGION:
-                        if (server.getActive().getUIs().religion) {
+                        if (server.players[id].getUIs().religion) {
                             server.updateReligion(id)
                         } else {
                             ws.send(JSON.stringify({
@@ -692,9 +692,17 @@ export default class GameServer {
                                 type: CommEnum.ERROR,
                                 message: "You don't have a religion."
                             }))
-                        } else if (!server.players[id].religion()!.isValid(server.players[id].cih()[tenantToAdd])) {
+                        } else if (server.players[id].religion()!.isValid(server.players[id].cih()[tenantToAdd])) {
                             //remove the card from the player and add it to the religion
-                            server.players[id].religion()!.addCard(server.players[id].cih()[tenantToAdd])
+                            server.players[id].religion()!.addCard({
+                                owner: server.players[id],
+                                opps: opps,
+                                deck: server.deck,
+                                card: server.players[id].cih()[tenantToAdd].clone()
+                            })
+                            server.players[id].setCiH(server.players[id].cih().filter(x => x !== server.players[id].cih()[tenantToAdd]))
+                            server.updateReligion(id)
+                            server.incrementPhase()
                         }
                         break;
                     case CommEnum.RESOLVE_INTERRUPT:

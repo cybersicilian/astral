@@ -14,17 +14,18 @@ export default class ReligionTab extends React.Component<ReligionTabProps, {}> {
         return (
             <div>
                 <h5>Religion</h5>
-                {this.props.client.religion ? (
+                <h6>Instead of playing a card, you may slot a card into your religion.</h6>
+                {this.props.client.getReligion() ? (
                     <div>
-                        <h3>{this.props.client.religion.name}</h3>
+                        <h3>{this.props.client.getReligion().name}</h3>
                         <br/>
-                        {this.props.client.religion.structure.map((structure, index) => {
-                            if (this.props.client.religion.slots[index]) {
+                        {this.props.client.getReligion().structure.map((structure, index) => {
+                            if (this.props.client.getReligion().slots[index]) {
                                 return (
                                     <div key={index}>
                                         <h5>{structure.name}</h5>
-                                        <p>Slot: {this.props.client.religion.slots[index].name}</p>
-                                        <p>{this.props.client.religion.slots[index].description}</p>
+                                        <p>Slot: {this.props.client.getReligion().slots[index].name}</p>
+                                        <p>{this.props.client.getReligion().slots[index].text}</p>
                                     </div>
                                 )
                             } else {

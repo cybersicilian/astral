@@ -40,4 +40,16 @@ export default class SlottedAbility extends BaseAbility {
     playerEvents() {
         return this.callbacks.playerEvents ?? {}
     }
+
+    clone() {
+        let ability = new SlottedAbility(this.text, this.callbacks)
+        ability.setFormula(this.formula)
+        ability.setCanPlay(this.canPlay.getCallback())
+        ability.setCanGive(this.canGive.getCallback())
+        ability.sai(this.ai())
+        for (let prop of Object.keys(this.props)) {
+            ability.setProp(prop, this.props[prop])
+        }
+        return ability
+    }
 }

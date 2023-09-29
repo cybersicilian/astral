@@ -289,7 +289,7 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
 
     onSlottable(args: CardArgs) {
         for (let ability of this.orderAbilities()) {
-            if (ability.getProp("slotted_ability") && ability instanceof SlottedAbility) {
+            if (ability.getProp("slotted_ability")) {
                 (ability as SlottedAbility).onSlot(args)
             }
         }
