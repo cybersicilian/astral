@@ -203,7 +203,8 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                         {state == TurnState.NotTurn && (<>
                             {this.props.client.remainingInterrupts() > 0 && (<>
                                 <h4>
-                                    Select {this.props.client.remainingInterrupts()} more card{this.props.client.remainingInterrupts() > 1 ? "s" : ""} for this ability
+                                    Select {this.props.client.remainingInterrupts()} more
+                                    card{this.props.client.remainingInterrupts() > 1 ? "s" : ""} for this ability
                                 </h4>
                             </>)}
                         </>)}
@@ -303,17 +304,20 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                         {
                                             [...this.props.comp.game.discard].reverse().map((card: CardState, index: number) => {
                                                 return (
-                                                    <CardView chooseable={FLAG_CAN_PICK_CARD_IN_YARD}
-                                                              onChoose={(card) => {
-                                                                  if (state == TurnState.Play) {
-                                                                      if (this.state.playState == PlayState.SelectingChoices && NEXT_CHOICE && (NEXT_CHOICE.choice === Choices.CARD_IN_DISCARD)) {
-                                                                          this.props.client.makeNextChoice(this.props.comp.game.discard.length - (index + 1))
-                                                                          this.forceUpdate()
-                                                                      }
-                                                                  }
-                                                              }}
-                                                              key={this.props.comp.game.discard.length - (index + 1)}
-                                                              card={card}/>
+                                                    <CardView
+                                                        chooseable={FLAG_CAN_PICK_CARD_IN_YARD}
+                                                        textOnly={false}
+                                                        onChoose={(card) => {
+                                                            if (state == TurnState.Play) {
+                                                                if (this.state.playState == PlayState.SelectingChoices && NEXT_CHOICE && (NEXT_CHOICE.choice === Choices.CARD_IN_DISCARD)) {
+                                                                    this.props.client.makeNextChoice(this.props.comp.game.discard.length - (index + 1))
+                                                                    this.forceUpdate()
+                                                                }
+                                                            }
+                                                        }}
+                                                        key={this.props.comp.game.discard.length - (index + 1)}
+                                                        card={card}
+                                                    />
                                                 )
                                             })
                                         }
@@ -341,9 +345,10 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                 <Tab eventKey="logs" title="Game Logs">
                                     <div className={"gameLogs"}>
                                         <pre>
-                                            {this.props.comp.game.logs.map((log, index) => {
+                                            {(this.props.comp.game.logs ?? []).map((log, index) => {
                                                 return (
-                                                    <><LogEntry client={this.props.client} content={log} key={index}></LogEntry><br/></>
+                                                    <><LogEntry client={this.props.client} content={log}
+                                                                key={index}></LogEntry><br/></>
                                                 )
                                             })}
                                         </pre>
@@ -367,7 +372,7 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                         textOnly={false}
                                         selectedTab={this.state.playAreaTab}
                                         chooseable={(FLAG_CAN_PICK_CARD_IN_HAND &&
-                                            ((!(this.state.playState == PlayState.SelectingChoices && index == this.state.selectedCardForPlaying) && (card.playable || !(this.state.playState == PlayState.SelectingCard && state == TurnState.Play))))) ||
+                                                ((!(this.state.playState == PlayState.SelectingChoices && index == this.state.selectedCardForPlaying) && (card.playable || !(this.state.playState == PlayState.SelectingCard && state == TurnState.Play))))) ||
                                             ((state == TurnState.NotTurn && this.props.comp.player.interrupts.length > 0 && !this.props.client.choseInterrupt(index))) ||
                                             ((state == TurnState.Play && this.state.playState == PlayState.SelectingCard && this.state.playAreaTab == "religion" && this.props.client.cachedReligion().validity[index]))}
                                         onChoose={(card) => {

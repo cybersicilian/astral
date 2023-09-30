@@ -136,7 +136,7 @@ export default class Bot {
     }
 
     evaluate(card: Card, c: CardArgs) {
-        let weights = card.getTraits(c)
+        let weights = card.getTraits({...c, card: card})
         let sum = 0;
         //now, we modify those weights based on the bot's profile multiplicatively
         for (const weight in weights.profile) {

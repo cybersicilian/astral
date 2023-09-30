@@ -37,6 +37,7 @@ export default class Client {
     private curr_state: CardState[] = []
     private player_state: PlayerState | undefined = undefined
     private game_state: GameState | undefined = undefined
+    private logs: string[] = []
 
     private socket: WebSocket | undefined = undefined
 
@@ -68,7 +69,7 @@ export default class Client {
         return {
             cards: this.curr_state,
             player: this.player_state,
-            game: this.game_state
+            game: {...this.game_state, logs: this.logs}
         }
     }
 
@@ -379,6 +380,9 @@ export default class Client {
                     break;
                 case CommEnum.TRANSFER_RELIGION:
                     this.religion = body.religion
+                    break;
+                case CommEnum.SEND_LOG:
+                    this.logs.push(body.log)
                     break;
             }
         });

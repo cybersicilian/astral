@@ -9,6 +9,7 @@ export enum CommEnum {
     SET_NAME,
     UPDATE_PLAYER_STATE,
     SERVER_MSG,
+    SEND_LOG,
 
     //host commands
     ADD_BOT,
@@ -53,7 +54,7 @@ export type GameState = {
         text: string,
         props: Properties
     }[],
-    logs: string[],
+    logs?: string[],
     uis: {[key: string]: boolean}
     config: ServerConfig
 }

@@ -96,6 +96,12 @@ export default class GameServer {
 
     gameLog(content: string) {
         this.sendableLogs.push(content)
+        for (let socket of Object.values(this.sockets)) {
+            socket.send(JSON.stringify({
+                type: CommEnum.SEND_LOG,
+                log: content
+            }))
+        }
     }
 
     getDeck() {
@@ -365,7 +371,6 @@ export default class GameServer {
                     activeTurn: index,
                     deck: this.deck.length,
                     config: this.serverConfig,
-                    logs: this.sendableLogs.map(x => x.toString()),
                     discard: this.deck.discardPile.map(x => ({
                         name: x.getDisplayName(),
                         text: x.getFormulatedText({
