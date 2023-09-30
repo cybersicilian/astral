@@ -20,6 +20,7 @@ import AbilityRecoverCards from "../../abilities/AbilityRecoverCards";
 import AbilityDiscardOppCard from "../../abilities/AbilityDiscardOppCard";
 import AbilityRemoveTurns from "../../abilities/AbilityRemoveTurns";
 import AbilitySkipOpp from "../../abilities/AbilitySkipOpp";
+import AbilityAddAbility from "../../abilities/AbilityAddAbility";
 
 const DeckList: { [key: string]: Card[] } = {
     zombie_deck: [
@@ -100,8 +101,8 @@ const DeckList: { [key: string]: Card[] } = {
                         args.owner.addResource("faith", 1)
                     }]
                 }
-            })
-        ]).setProp(PropEnums.RELIGION, [0]).setRarity(Rarity.BASIC),
+            }).setProp(PropEnums.RELIGION, [0])
+        ]).setRarity(Rarity.BASIC),
         new Card(`Thoughts and Prayers`, [
             new AbilityAddResource(0, "faith"),
             new AbilityAddTurns(3).setText(`Meditate. Add {formula} turns.`)
@@ -137,14 +138,8 @@ const DeckList: { [key: string]: Card[] } = {
             new AbilitySkipOpp(1)
         ]).setRarity(Rarity.MYTHIC),
         new Card(`Innovate`, [
-            new BaseAbility(`Add "Draw {formula} card" to a card in your hand.`, [
-                {choice: Choices.CARD_IN_HAND, pointer: Pointer.CARD_IN_HAND_RANDOM}
-            ], (a, m) => {
-                let card = m[0] as Card
-                card.setName(`Innovative ${card.getName()}`)
-                card.addAbility(new AbilityDrawCard(a.card?.pow() - card.pow()))
-            }).setFormula(`{pow}`),
-        ]).setRarity(Rarity.UNCOMMON),
+            new AbilityAddAbility(new AbilityDrawCard(1), `Innovative {name}`, Choices.CARD_IN_HAND)
+        ]).setRarity(Rarity.COMMON),
         new Card(`You Could Make a Religion Outta This`, [
             new AbilityAddDeck("faith_deck"),
             new AbilityAddResource(1, "faith"),

@@ -9,7 +9,7 @@ export default class AbilityIncreasePower extends BaseAbility {
             { choice: Choices.CARD_IN_HAND, pointer: Pointer.CARD_IN_HAND_LEAST_POWER }
         ], (abilityArgs, madeChoices) => {
             if (abilityArgs.choices) {
-                (abilityArgs.choices[0] as Card).setPow((abilityArgs.choices[0] as Card).pow() + qty + abilityArgs.card!.pow())
+                (abilityArgs.choices[0] as Card).setPow((abilityArgs.choices[0] as Card).pow() + this.calcFormula(abilityArgs))
             }
         })
 

@@ -4,9 +4,9 @@ export default class AbilitySymDraw extends BaseAbility {
 
     constructor(qty: number) {
         super(`Each player draws {formula} cards`, [], (abilityArgs, madeChoices) => {
-            abilityArgs.owner.draw(abilityArgs.deck, abilityArgs.card.pow() + qty)
+            abilityArgs.owner.draw(abilityArgs.deck, this.calcFormula(abilityArgs))
             for (let opp of abilityArgs.opps) {
-                opp.draw(abilityArgs.deck, abilityArgs.card.pow() + qty)
+                opp.draw(abilityArgs.deck, this.calcFormula(abilityArgs))
             }
         })
 

@@ -20,6 +20,7 @@ export default class AbilityExplodeCard extends BaseAbility {
             let card = madeChoices[0] as Card
             let new_cards = card.explode(abilityArgs)
             new_cards.forEach((card) => {
+                card.setPow(this.calcFormula(abilityArgs))
                 card.move(Zone.HAND, abilityArgs)
             })
         })

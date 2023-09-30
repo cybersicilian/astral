@@ -6,13 +6,13 @@ import {CardArgs} from "../gameplay/cards/CardArgs";
 export default class AbilityAddTurnsOpp extends BaseAbility {
 
     constructor(qty: number) {
-        super(`Add {formula} turns to opponent.`, [
+        super(`Add {formula} turns to opponent`, [
             { choice: Choices.OPPONENT, pointer: Pointer.OPPONENT_LEAST_TURNS_REMAINING }
         ], (abilityArgs, madeChoices) => {
             let opponent = madeChoices[0] as Player
-            opponent.addTurns(qty + abilityArgs.card?.pow())
+            opponent.addTurns(this.calcFormula(abilityArgs))
         })
-        this.setFormula(`{pow} + ${qty}`)
+        this.setFormula(`{pow} + ${qty} - 1`)
         this.sai({
             oppWinSetback: qty,
             affectsOpponents: (c: CardArgs) => qty / c.opps.length,

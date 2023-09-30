@@ -604,7 +604,7 @@ export default class GameServer {
                                 type: CommEnum.ERROR,
                                 message: "This card can't be discarded - not the discard phase."
                             }))
-                        } else if (server.players[id].cih().length <= server.players[id].getHandsize()) {
+                        } else if (server.players[id].cih().length < server.players[id].getHandsize()) {
                             ws.send(JSON.stringify({
                                 type: CommEnum.ERROR,
                                 message: "This card can't be discarded - you don't have enough cards in hand."
@@ -620,10 +620,12 @@ export default class GameServer {
                                     for (let card of toDiscardCards) {
                                         server.deck.discardPile.push(card)
                                     }
-                                    server.updateAllStates()
                                     if (server.players[id].cih().length <= server.players[id].getHandsize()) {
                                         break;
                                         server.incrementTurn()
+                                        server.updateAllStates()
+                                    } else {
+                                        server.updateAllStates()
                                     }
                                 }
                             }

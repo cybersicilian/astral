@@ -3,7 +3,7 @@ import {CardArgs} from "../gameplay/cards/CardArgs";
 
 export default class AbilityAntivaxxer extends BaseAbility {
     constructor() {
-        super(`You become innoculated with propaganda. You're an antivaxxer now.`, [], (a, m) => {
+        super(`You become innudated with propaganda - you're an antivaxxer now`, [], (a, m) => {
             a.owner.setProp("antivaxxer", true)
         })
 

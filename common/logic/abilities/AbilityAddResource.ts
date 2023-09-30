@@ -10,7 +10,7 @@ export default class AbilityAddResource extends BaseAbility {
         this.setProp("resource", true)
         if (!this.getProp("produce")) this.setProp("produce", [])
         this.setProp("produce", [...this.getProp("produce"), resource])
-        this.setFormula(`{pow} + ${qty}`)
+        this.setFormula(`{pow} + ${qty} - 1`)
 
         this.sai({
             collectResource: qty

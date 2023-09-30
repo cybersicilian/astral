@@ -4,7 +4,7 @@ export default class AbilityDrawCard extends BaseAbility {
 
     constructor(qty: number) {
         super(`Draw {formula} cards`, [], (abilityArgs, madeChoices) => {
-            abilityArgs.owner.draw(abilityArgs.deck!, abilityArgs.card!.pow() + qty)
+            abilityArgs.owner.draw(abilityArgs.deck!, this.calcFormula(abilityArgs))
         })
 
         this.sai({

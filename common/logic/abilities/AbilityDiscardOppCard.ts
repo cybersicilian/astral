@@ -9,10 +9,11 @@ export default class AbilityDiscardOppCard extends BaseAbility {
             { choice: Choices.OPPONENT, pointer: Pointer.OPPONENT_MOST_CARDS }
         ], (abilityArgs, madeChoices) => {
             let opponent = madeChoices[0] as Player
-            if (opponent.cih().length <= abilityArgs.card!.pow()) {
+            let number = this.calcFormula(abilityArgs)
+            if (opponent.cih().length <= number) {
                 opponent.discardHand(abilityArgs);
             }
-            for (let i = 0; i < abilityArgs.card!.pow() + qty; i++) {
+            for (let i = 0; i < number; i++) {
                 if (opponent.inHand() === 0) {
                     break;
                 }
@@ -21,8 +22,8 @@ export default class AbilityDiscardOppCard extends BaseAbility {
         })
 
         this.sai({
-            affectsOpponents: (cardArgs) => cardArgs.card.pow() + qty / cardArgs.opps.length,
-            discardsOpponentCards: (cardArgs) => cardArgs.card.pow() + qty
+            affectsOpponents: (cardArgs) => this.calcFormula(cardArgs) / cardArgs.opps.length,
+            discardsOpponentCards: (cardArgs) => this.calcFormula(cardArgs)
         })
 
         this.setFormula(`{pow} + ${qty}`)

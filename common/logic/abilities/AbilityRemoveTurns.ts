@@ -7,7 +7,7 @@ export default class AbilityRemoveTurns extends BaseAbility {
 
     constructor(qty: number) {
         super(`Remove {formula} turns.`, [], (abilityArgs, madeChoices) => {
-            abilityArgs.owner.addTurns(-Math.max(0, qty + abilityArgs.card?.pow()))
+            abilityArgs.owner.addTurns(-Math.max(0, this.calcFormula(abilityArgs)))
         })
         this.setFormula(`${qty} + {pow}`)
         this.sai({

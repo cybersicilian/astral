@@ -154,7 +154,17 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
     }
 
     getProps() {
-        return {...this.props}
+        let transferable_props = {}
+        for (let ability of this.orderAbilities()) {
+            for (let prop of Object.keys(ability.getProps())) {
+                if (!transferable_props[prop] && prop.startsWith("meta_")) {
+                    transferable_props[prop] = ability.getProp(prop)
+                } else if (Array.isArray(transferable_props[prop])) {
+                    transferable_props[prop].push(ability.getProp(prop))
+                }
+            }
+        }
+        return {...this.props, ...transferable_props}
     }
 
     getProp(prop: string) {

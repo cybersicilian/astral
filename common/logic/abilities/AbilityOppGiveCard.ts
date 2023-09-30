@@ -9,7 +9,7 @@ export default class AbilityOppGiveCard extends BaseAbility {
             { choice: Choices.OPPONENT, pointer: Pointer.OPPONENT_MOST_CARDS }
         ], (abilityArgs, madeChoices) => {
             let opponent = madeChoices[0] as Player
-            let numCards = Math.min(opponent.cih().length, abilityArgs.card.pow() + qty)
+            let numCards = Math.min(opponent.cih().length, this.calcFormula(abilityArgs))
             for (let i = 0; i < numCards; i++) {
                 opponent.giveChoose(abilityArgs)
             }

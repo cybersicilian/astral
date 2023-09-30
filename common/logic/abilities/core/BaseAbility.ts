@@ -114,6 +114,10 @@ export default class BaseAbility implements IProppable, IEventable, IPlayable {
         return typeof this.canPlay === "function" || !this.canPlay
     }
 
+    getRawText() {
+        return this.text
+    }
+
     getText() {
         return this.text.replace("{formula}", this.textualizeFormula());
     }

@@ -371,7 +371,7 @@ export class PlayerView extends React.Component<PlayerViewProps, PlayerViewState
                                     <CardView
                                         textOnly={false}
                                         selectedTab={this.state.playAreaTab}
-                                        chooseable={(FLAG_CAN_PICK_CARD_IN_HAND &&
+                                        chooseable={(FLAG_CAN_PICK_CARD_IN_HAND && (this.state.playAreaTab !== "religion") &&
                                                 ((!(this.state.playState == PlayState.SelectingChoices && index == this.state.selectedCardForPlaying) && (card.playable || !(this.state.playState == PlayState.SelectingCard && state == TurnState.Play))))) ||
                                             ((state == TurnState.NotTurn && this.props.comp.player.interrupts.length > 0 && !this.props.client.choseInterrupt(index))) ||
                                             ((state == TurnState.Play && this.state.playState == PlayState.SelectingCard && this.state.playAreaTab == "religion" && this.props.client.cachedReligion().validity[index]))}

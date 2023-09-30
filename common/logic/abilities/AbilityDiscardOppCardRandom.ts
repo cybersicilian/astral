@@ -9,7 +9,7 @@ export default class AbilityDiscardOppCardRandom extends BaseAbility {
             { choice: Choices.OPPONENT, pointer: Pointer.OPPONENT_MOST_CARDS }
         ], (abilityArgs, madeChoices) => {
             let opponent = madeChoices[0] as Player
-            for (let i = 0; i < abilityArgs.card!.pow() + qty; i++) {
+            for (let i = 0; i < this.calcFormula(abilityArgs); i++) {
                 if (opponent.inHand() === 0) {
                     break;
                 }
