@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/astral.iml" filepath="$PROJECT_DIR$/.idea/astral.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../empire/.idea/empire.iml" filepath="$PROJECT_DIR$/../empire/.idea/empire.iml" />
     </modules>
   </component>
 </project>

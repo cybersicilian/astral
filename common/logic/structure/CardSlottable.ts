@@ -1,6 +1,7 @@
 import Card from "../gameplay/cards/Card";
 import {CardState} from "../gameplay/player/Player";
 import {CardArgs} from "../gameplay/cards/CardArgs";
+import {IStateable} from "./interfaces/IStateable";
 
 export type SlottableTier = {
     name?: string
@@ -17,7 +18,7 @@ export type CardSlottableState = {
 
 export type SlottableValidityMap = boolean[]
 
-export abstract class CardSlottable {
+export abstract class CardSlottable implements IStateable<CardSlottableState> {
 
     protected structure: SlottableTier[] = [];
     protected slots: Card[] = [];

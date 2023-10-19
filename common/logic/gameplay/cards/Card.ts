@@ -230,7 +230,7 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
     toState(a: CardArgs) {
         let props = {...this.getProps()}
         //filter deck from props
-        delete props.deck
+        // delete props.deck
         return {
             name: this.getDisplayName(),
             text: this.getFormulatedText(a),
@@ -250,7 +250,7 @@ export default class Card implements IIdentifiable, IProppable, ITriggerable, IP
     toCardState(): CardState {
         let props = {...this.getProps()}
         //filter deck from props
-        delete props.deck
+        // delete props.deck
         return {
             name: this.name,
             power: this.power,

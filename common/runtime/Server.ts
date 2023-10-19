@@ -14,6 +14,7 @@ import {adjustAIWeights} from "./dummies/ai_heuristics";
 import {TurnInterrupt} from "../logic/structure/utils/TurnInterrupt";
 import Card from "../logic/gameplay/cards/Card";
 import Religion from "../logic/gameplay/player/systems/Religion";
+import {TurnPhase} from "../logic/structure/utils/TurnPhase";
 
 export type ServerConfig = {
     startingHand: number, //4
@@ -65,7 +66,7 @@ export default class GameServer {
         this.deck.shuffle()
         this.sockets = {}
         this.players = {}
-        this.turnPhase = 0
+        this.turnPhase = TurnPhase.DRAW
         this.activeTurn = ""
         this.sendableLogs = []
         this.log("Server reset!")
@@ -74,8 +75,8 @@ export default class GameServer {
 
     static createName() {
         let name = [
-            ["Cheddar", "Swiss", "Sewer", "Moist", "Crusty", "Crunchy", "Crispy", "Bam", "Bang", "Slam", "Meow", "Bark", "Grand", "Del", "Dip", "Rich", "Povert", "Rogue", "Joleto", "Tad", "Italian", "Spicy", "Salty", "Sweet", "Sour", "Bitter", "Stinky", "Irritating", "Meaty", "Cool", "Neato", "Awesome", "Sassy"],
-            ["amole", "lotion", "bacon", "slice", "sliver", "fluid", "ian", "jess", "tad", "Loaf", "Crust", "Crunch", "Crisp", "Ioli", "Head", "Ino", "Pants", "Zilla", "Shirt", "Shoes", "Hat", "Glove", "Sock", "Spaghetti", "Oritto", "Ravioli", "Gnocchi", "Chilada", "Pierogi", "Burrito", "Taco", "Enchilada", "Tamale", "Changa", "Dilla", "Nachos", "Tilla", "Chip", "Salsa", "Guacamole", "Asaurus", "Eratops"],
+            ["Critter", "Cole", "Cheddar", "Swiss", "Sewer", "Moist", "Crusty", "Crunchy", "Crispy", "Bam", "Bang", "Slam", "Meow", "Bark", "Grand", "Del", "Dip", "Rich", "Povert", "Rogue", "Joleto", "Tad", "Italian", "Spicy", "Salty", "Sweet", "Sour", "Bitter", "Stinky", "Irritating", "Meaty", "Cool", "Neato", "Awesome", "Sassy"],
+            ["bug", "amole", "lotion", "bacon", "slice", "sliver", "fluid", "myn", "ian", "jess", "tad", "Loaf", "Crust", "Crunch", "Crisp", "Ioli", "Head", "Ino", "Pants", "Zilla", "Shirt", "Shoes", "Hat", "Glove", "Sock", "Spaghetti", "Oritto", "Ravioli", "Gnocchi", "Chilada", "Pierogi", "Burrito", "Taco", "Enchilada", "Tamale", "Changa", "Dilla", "Nachos", "Tilla", "Chip", "Salsa", "Guacamole", "Asaurus", "Eratops"],
             [" Mc", " ", " ", " ", " ", " ", " ", " ", " Mac", " O'"],
             ["Pan", "Tad", "Crap", "Gene", "Friendly", "Spicy", "Hate", "Spinach", "Slam", "Magic", "Eraser", "Bougie", "Ball", "Supremo", "Bean", "Burger", "Bread", "Biscuit", "Bacon", "Bun", "Biscuit", "Burger", "Bread", "Kitty", "Wood", "Morning", "Soft", "Hard", "Raging", "", ""],
             ["Plumbing", "Orama", "Adic", "Tastic", "Full", "Loaf", "Fruit", "Table", "Chair", "Brian", "Brain", "Atomy", "Acist", "Ologist", "Doofus", "Dorkus", "Itis", "Person", "Biden", "Trump", "Obama", "Bush", "Clinton", "Reagan", "Carter", "Folk", "Ford", "Sandal", "Muncher", "Potato", "Whiskey", "Bourbon"]
@@ -178,17 +179,17 @@ export default class GameServer {
             return upgrade.getData(cardArgs)
         })
         let CAN_DISCARD = this.getActive().cih().length > this.getActive().getHandsize()
-        if (this.turnPhase === 0) {
-            if (CAN_GIVE) { this.turnPhase = 1 }
-            else if (CAN_PLAY) { this.turnPhase = 2 }
-            else if (CAN_DISCARD) { this.turnPhase = 3 }
+        if (this.turnPhase === TurnPhase.DRAW) {
+            if (CAN_GIVE) { this.turnPhase = TurnPhase.GIVE }
+            else if (CAN_PLAY) { this.turnPhase = TurnPhase.PLAY }
+            else if (CAN_DISCARD) { this.turnPhase = TurnPhase.DISCARD }
             else { this.incrementTurn() }
-        } else if (this.turnPhase === 1) {
-            if (CAN_PLAY) { this.turnPhase = 2 }
-            else if (CAN_DISCARD) { this.turnPhase = 3 }
+        } else if (this.turnPhase === TurnPhase.GIVE) {
+            if (CAN_PLAY) { this.turnPhase = TurnPhase.PLAY }
+            else if (CAN_DISCARD) { this.turnPhase = TurnPhase.DISCARD }
             else { this.incrementTurn() }
-        } else if (this.turnPhase === 2) {
-            if (CAN_DISCARD) { this.turnPhase = 3 }
+        } else if (this.turnPhase === TurnPhase.PLAY) {
+            if (CAN_DISCARD) { this.turnPhase = TurnPhase.DISCARD }
             else { this.incrementTurn() }
         }
         this.updateAllStates()
@@ -197,7 +198,7 @@ export default class GameServer {
     incrementTurn() {
         this.gameLog(`${this.getActive().getLogText()} ended their turn.`)
         this.gameLog(`===NEW TURN===`)
-        this.turnPhase = 0
+        this.turnPhase = TurnPhase.DRAW
         if (Object.values(this.players).length == 0) {
             this.activeTurn = ""
             //don't need to update states if nobody's connected
@@ -231,7 +232,7 @@ export default class GameServer {
         } catch (e) {
             this.gameLog(`${this.getActive().getLogText()} has an error in their hand: ${e}`)
         }
-        this.turnPhase = 1
+        this.turnPhase = TurnPhase.GIVE
         this.updateAllStates()
 
         if (this.getActive().cih().length >= 2) {
@@ -247,9 +248,9 @@ export default class GameServer {
 
         let played = playable.length > 0
         if (played) {
-            this.turnPhase = 2
+            this.turnPhase = TurnPhase.PLAY
         } else {
-            this.turnPhase = 3
+            this.turnPhase = TurnPhase.DISCARD
         }
         this.updateAllStates()
 
@@ -260,7 +261,7 @@ export default class GameServer {
                 this.gameLog(`${this.getActive().getLogText()} plays ${weighted.getLogText()}.`)
                 this.getActive().play(weighted, opps, this.deck)
             }
-            this.turnPhase = 3
+            this.turnPhase = TurnPhase.DISCARD
             this.updateAllStates()
         }
 

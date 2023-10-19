@@ -1,5 +1,5 @@
 import SlottedAbility, {SlottedCallbacks} from "./core/SlottedAbility";
-import {Systems} from "../structure/utils/Systems";
+import Card from "../gameplay/cards/Card";
 
 export default class SlottedAbilityReligious extends SlottedAbility {
     constructor(text: string, slotted: SlottedCallbacks, card: Card) {

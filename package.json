@@ -1,0 +1,8 @@
+{
+  "name": "astral",
+  "version": "1.0.0",
+  "scripts": {
+    "build-all": "cd ./common && bun run build && cd ../vos-frontend && bun run build",
+    "commit": "git commit -am 'auto-commit' && git push origin"
+  }
+}
