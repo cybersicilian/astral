@@ -1,5 +1,5 @@
 {
-  "name": "vos-common",
+  "name": "@thoughtmunch/vos-common",
   "type": "module",
   "devDependencies": {
     "bun-types": "latest"
@@ -18,5 +18,6 @@
     "bun": "^1.0.3",
     "react": "^18.2.0",
     "ws": "^8.14.2"
-  }
+  },
+  "module": "index.ts"
 }

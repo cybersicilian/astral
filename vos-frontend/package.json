@@ -1,5 +1,5 @@
 {
-  "name": "vos-frontend",
+  "name": "@thoughtmunch/vos-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,7 +16,7 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.8.0",
     "react-dom": "^18.2.0",
-    "vos-common": "link:vos-common"
+    "@thoughtmunch/vos-common": "link:@thoughtmunch/vos-common"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

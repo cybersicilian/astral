@@ -27,18 +27,16 @@ export type ServerConfig = {
 export default class GameServer {
 
     private players: { [key: string]: Player } = {}
-    private sockets: { [key: string]: any } = {}
     private deck: Deck
 
     private turnPhase: number = 0
-    //0 - draw
-    //1 - play
-    //2 - give
 
     private activeTurn: string = ""
 
     private logEntries: string[] = []
     private sendableLogs: string[] = []
+    private sockets: { [key: string]: any } = {}
+    private booted: boolean = false
 
     private serverObj: WebSocketServer | undefined = undefined
     private serverPort: number = 15912
@@ -49,8 +47,6 @@ export default class GameServer {
         minPlayers: 1,
         fairness: true
     }
-
-    private booted: boolean = false
 
     constructor() {
         this.deck = Deck.fromCardList(60, "basic")

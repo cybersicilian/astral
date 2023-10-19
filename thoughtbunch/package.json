@@ -1,5 +1,5 @@
 {
-  "name": "thoughtbunch",
+  "name": "@thoughtmunch/server",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
